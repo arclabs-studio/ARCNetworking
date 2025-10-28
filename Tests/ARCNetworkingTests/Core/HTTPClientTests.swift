@@ -32,7 +32,7 @@ struct HTTPClientTests {
     
     // MARK: Tests
 
-    @Test("Decodifica correctamente una respuesta exitosa")
+    @Test("Decodes a successful response")
     func executeReturnsDecodedResponse() async throws {
         defer { unregisterHandler() }
         let expectedModel = MockEndpoint.ResponseModel(id: 42, title: "ARC Networking Rocks")
@@ -50,7 +50,7 @@ struct HTTPClientTests {
         #expect(result == expectedModel)
     }
     
-    @Test("Propaga error para status codes fuera del rango 2xx")
+    @Test("Propagates errors for non-2xx status codes")
     func executeThrowsForHTTPError() async {
         defer { unregisterHandler() }
         registerHandler { request in
@@ -63,19 +63,19 @@ struct HTTPClientTests {
         
         do {
             _ = try await sut.execute(endpoint)
-            Issue.record("Se esperaba HTTPError.requestFailed")
+            Issue.record("Expected HTTPError.requestFailed")
         } catch let error as HTTPError {
             if case .requestFailed(let statusCode) = error {
                 #expect(statusCode == 404)
             } else {
-                Issue.record("Error inesperado: \(error)")
+                Issue.record("Unexpected error: \(error)")
             }
         } catch {
-            Issue.record("Error inesperado de tipo distinto: \(error)")
+            Issue.record("Unexpected error of different type: \(error)")
         }
     }
     
-    @Test("Envía HTTPError.decodingFailed cuando la decodificación falla")
+    @Test("Throws HTTPError.decodingFailed when decoding fails")
     func executeThrowsForDecodingError() async {
         defer { unregisterHandler() }
         registerHandler { request in
@@ -89,19 +89,19 @@ struct HTTPClientTests {
         
         do {
             _ = try await sut.execute(endpoint)
-            Issue.record("Se esperaba HTTPError.decodingFailed")
+            Issue.record("Expected HTTPError.decodingFailed")
         } catch let error as HTTPError {
             if case .decodingFailed = error {
-                // Esperado
+                // Expected
             } else {
-                Issue.record("Error inesperado: \(error)")
+                Issue.record("Unexpected error: \(error)")
             }
         } catch {
-            Issue.record("Error inesperado de tipo distinto: \(error)")
+            Issue.record("Unexpected error of different type: \(error)")
         }
     }
     
-    @Test("Envía HTTPError.unknown cuando la respuesta no es HTTP")
+    @Test("Throws HTTPError.unknown when the response is non-HTTP")
     func executeThrowsUnknownForNonHTTPResponse() async {
         defer { unregisterHandler() }
         registerHandler { request in
@@ -114,19 +114,19 @@ struct HTTPClientTests {
         
         do {
             _ = try await sut.execute(endpoint)
-            Issue.record("Se esperaba HTTPError.unknown")
+            Issue.record("Expected HTTPError.unknown")
         } catch let error as HTTPError {
             if case .unknown = error {
-                // Esperado
+                // Expected
             } else {
-                Issue.record("Error inesperado: \(error)")
+                Issue.record("Unexpected error: \(error)")
             }
         } catch {
-            Issue.record("Error inesperado de tipo distinto: \(error)")
+            Issue.record("Unexpected error of different type: \(error)")
         }
     }
     
-    @Test("Propaga errores de transporte del URLSession")
+    @Test("Propagates URLSession transport errors")
     func executePropagatesTransportError() async {
         defer { unregisterHandler() }
         registerHandler { _ in
@@ -138,11 +138,11 @@ struct HTTPClientTests {
         
         do {
             _ = try await sut.execute(endpoint)
-            Issue.record("Se esperaba un URLError")
+            Issue.record("Expected URLError")
         } catch let error as URLError {
             #expect(error.code == .notConnectedToInternet)
         } catch {
-            Issue.record("Error inesperado de tipo distinto: \(error)")
+            Issue.record("Unexpected error of different type: \(error)")
         }
     }
 }

@@ -12,21 +12,21 @@ import Testing
 @Suite("HTTPError")
 struct HTTPErrorTests {
     
-    @Test("Descripción para invalidURL")
+    @Test("Description for invalidURL")
     func invalidURLDescription() {
         let error = HTTPError.invalidURL
         let description = error.localizedDescription
         #expect(description.contains("invalid"))
     }
     
-    @Test("Descripción para requestFailed incluye status code")
+    @Test("Description for requestFailed includes status code")
     func requestFailedDescription() {
         let error = HTTPError.requestFailed(422)
         let description = error.localizedDescription
         #expect(description.contains("422"))
     }
     
-    @Test("Descripción para decodingFailed muestra el error original")
+    @Test("Description for decodingFailed includes underlying error")
     func decodingFailedDescription() {
         struct DummyError: Error {}
         let error = HTTPError.decodingFailed(DummyError())
@@ -34,7 +34,7 @@ struct HTTPErrorTests {
         #expect(description.contains("Failed to decode response"))
     }
     
-    @Test("Descripción para unknown propaga el mensaje del error subyacente")
+    @Test("Description for unknown includes the underlying error message")
     func unknownDescription() {
         let underlying = URLError(.cannotConnectToHost)
         let error = HTTPError.unknown(underlying)

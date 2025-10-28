@@ -39,12 +39,12 @@ struct ARCNetworkServiceTests {
             callCount += 1
             receivedPaths.append(endpoint.path)
             guard let executeClosure else {
-                Issue.record("No se stubbeó la respuesta del MockHTTPClient")
+                Issue.record("MockHTTPClient response was not stubbed")
                 throw HTTPError.unknown(URLError(.badServerResponse))
             }
             let anyResult = try await executeClosure(endpoint)
             guard let typedResult = anyResult as? T.Response else {
-                fatalError("El tipo de respuesta \(type(of: anyResult)) no coincide con \(T.Response.self)")
+                fatalError("Response type \(type(of: anyResult)) does not match \(T.Response.self)")
             }
             return typedResult
         }
@@ -52,7 +52,7 @@ struct ARCNetworkServiceTests {
     
     // MARK: Tests
     
-    @Test("Delegación al cliente inyectado")
+    @Test("Delegates to the injected client")
     func requestUsesInjectedClient() async throws {
         let endpoint = MockEndpoint()
         let expectedResponse = MockEndpoint.ResponseModel(code: 200, message: "OK")
@@ -71,7 +71,7 @@ struct ARCNetworkServiceTests {
         #expect(response == expectedResponse)
     }
     
-    @Test("Integración end-to-end utilizando HTTPClient real")
+    @Test("End-to-end integration using the real HTTPClient")
     func requestEndToEnd() async throws {
         defer { unregisterHandler() }
         let endpoint = MockEndpoint()
@@ -89,7 +89,7 @@ struct ARCNetworkServiceTests {
         #expect(response == expectedResponse)
     }
     
-    @Test("Propaga errores HTTPError provenientes del cliente")
+    @Test("Propagates HTTPError instances thrown by the client")
     func requestPropagatesHTTPError() async {
         let endpoint = MockEndpoint()
         let expectedError = HTTPError.requestFailed(500)
@@ -103,15 +103,15 @@ struct ARCNetworkServiceTests {
         
         do {
             _ = try await service.request(endpoint)
-            Issue.record("Se esperaba que la llamada re-lanzara HTTPError.requestFailed")
+            Issue.record("Expected the call to rethrow HTTPError.requestFailed")
         } catch let error as HTTPError {
             if case .requestFailed(let code) = error {
                 #expect(code == 500)
             } else {
-                Issue.record("Error inesperado: \(error)")
+                Issue.record("Unexpected error: \(error)")
             }
         } catch {
-            Issue.record("Error inesperado de tipo distinto: \(error)")
+            Issue.record("Unexpected error of different type: \(error)")
         }
     }
 }

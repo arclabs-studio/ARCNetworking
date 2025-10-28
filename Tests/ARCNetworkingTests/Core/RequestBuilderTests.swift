@@ -42,7 +42,7 @@ struct RequestBuilderTests {
     
     // MARK: Tests
     
-    @Test("Construye un URLRequest con todos los componentes")
+    @Test("Builds a URLRequest with all components")
     func buildRequestAppliesAllEndpointData() throws {
         let builder = RequestBuilder()
         let endpoint = MockEndpoint()
@@ -58,7 +58,7 @@ struct RequestBuilderTests {
         #expect(payload == .init(name: "ARC"))
     }
     
-    @Test("Configura request GET sin body ni headers")
+    @Test("Builds a GET request without body or headers")
     func buildRequestHandlesEmptyOptionalValues() throws {
         let builder = RequestBuilder()
         let endpoint = BodylessEndpoint()
@@ -70,4 +70,3 @@ struct RequestBuilderTests {
         #expect(request.httpBody == nil)
     }
 }
-
