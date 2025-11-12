@@ -3,7 +3,7 @@
 A modern, modular, and type-safe networking layer built with Swift Concurrency.  
 Designed for scalability, reusability, and clean architecture across multiple iOS apps.
 
-![Swift](https://img.shields.io/badge/Swift-5.9-orange.svg)
+![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg)
 ![Platform](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)
 ![Xcode](https://img.shields.io/badge/Xcode-15%2B-blue.svg)
@@ -29,7 +29,7 @@ Designed for scalability, reusability, and clean architecture across multiple iO
 | macOS | 11.0 |
 | tvOS | 14.0 |
 | watchOS | 7.0 |
-| Swift | 5.9+ |
+| Swift | 6.0+ |
 | Xcode | 15+ |
 
 ---
