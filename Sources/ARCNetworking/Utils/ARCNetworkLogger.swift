@@ -12,7 +12,7 @@ public enum ARCNetworkLogger {
     
     // MARK: Private Properties
 
-    private static let logger = Logger(subsystem: "com.carlosrasensio.networking", category: "HTTP")
+    private static let logger = Logger(subsystem: "com.arclabs-studio.arcnetworking", category: "HTTP")
     
     // MARK: Public Functions
     
