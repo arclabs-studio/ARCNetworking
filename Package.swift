@@ -5,27 +5,43 @@ import PackageDescription
 
 let package = Package(
     name: "ARCNetworking",
+
+    // MARK: - Platforms
+
     platforms: [
-        .iOS(.v14),
-        .macOS(.v11),
-        .tvOS(.v14),
-        .watchOS(.v7)
+        .iOS(.v17),
+        .macOS(.v14),
+        .tvOS(.v17),
+        .watchOS(.v10)
     ],
+
+    // MARK: - Products
+
     products: [
         .library(
             name: "ARCNetworking",
             targets: ["ARCNetworking"]
-        ),
+        )
     ],
+
+    // MARK: - Targets
+
     targets: [
         .target(
             name: "ARCNetworking",
-            path: "Sources"
+            path: "Sources/ARCNetworking",
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency")
+            ]
         ),
         .testTarget(
             name: "ARCNetworkingTests",
             dependencies: ["ARCNetworking"],
-            path: "Tests"
+            path: "Tests/ARCNetworkingTests"
         )
-    ]
+    ],
+
+    // MARK: - Swift Language
+
+    swiftLanguageModes: [.v6]
 )
