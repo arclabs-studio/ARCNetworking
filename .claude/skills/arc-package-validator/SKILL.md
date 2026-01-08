@@ -96,8 +96,3 @@ The validator generates a Markdown report with:
 ## Reference
 
 For detailed standards and checklist, see [references/checklist.md](references/checklist.md).
-
-For ARCKnowledge documentation:
-- [package-structure.md](../../ARCKnowledge/Quality/package-structure.md)
-- [readme-standards.md](../../ARCKnowledge/Quality/readme-standards.md)
-- [arcdevtools.md](../../ARCKnowledge/Tools/arcdevtools.md)

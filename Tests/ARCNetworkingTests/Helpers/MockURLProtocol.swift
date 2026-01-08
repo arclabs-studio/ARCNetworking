@@ -8,7 +8,7 @@
 import Foundation
 
 /// Intercepts URLSession requests during tests to provide deterministic responses.
-final class MockURLProtocol: URLProtocol {
+class MockURLProtocol: URLProtocol {
     typealias Handler = (URLRequest) throws -> (URLResponse, Data)
 
     private static let lock = NSLock()
