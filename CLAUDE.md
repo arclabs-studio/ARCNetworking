@@ -22,8 +22,8 @@ ARCNetworking is a Swift networking library using async/await with a **Builder â
 ### Service Layer (`Sources/ARCNetworking/Services/`)
 - **ARCNetworkService** - High-level wrapper for dependency injection, accepts `HTTPClientProtocol`
 
-### Utils Layer (`Sources/ARCNetworking/Utils/`)
-- **ARCNetworkLogger** - Static logger using `os.Logger`, only active in `DEBUG` builds
+### Dependencies
+- **ARCLogger** - Structured logging library from ARC Labs Studio
 
 ## Key Conventions
 

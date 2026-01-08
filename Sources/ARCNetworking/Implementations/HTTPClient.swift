@@ -5,6 +5,7 @@
 //  Created by ARC Labs Studio on 24/10/25.
 //
 
+import ARCLogger
 import Foundation
 
 /// A concrete HTTP client that executes network requests using `URLSession`.
@@ -24,6 +25,7 @@ public final class HTTPClient: HTTPClientProtocol {
     private let session: URLSession
     private let builder: RequestBuilderProtocol
     private let decoder: JSONDecoder
+    private let logger = ARCLogger(subsystem: "com.arclabs-studio.arcnetworking", category: "HTTP")
 
     // MARK: Initialization
 
@@ -48,15 +50,11 @@ public final class HTTPClient: HTTPClientProtocol {
     public func execute<T>(_ endpoint: T) async throws -> T.Response where T: Endpoint {
         let request = try builder.buildRequest(from: endpoint)
 
-        #if DEBUG
-        ARCNetworkLogger.log(request: request)
-        #endif
+        logRequest(request)
 
         let (data, response) = try await session.data(for: request)
 
-        #if DEBUG
-        ARCNetworkLogger.log(response: response, data: data)
-        #endif
+        logResponse(response, data: data)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw HTTPError.unknown(NSError(domain: "Invalid response", code: 0))
@@ -69,10 +67,51 @@ public final class HTTPClient: HTTPClientProtocol {
         do {
             return try decoder.decode(T.Response.self, from: data)
         } catch {
-            #if DEBUG
-            ARCNetworkLogger.log(error: error)
-            #endif
+            logger.error("Decoding failed", metadata: ["error": .public(error.localizedDescription)])
             throw HTTPError.decodingFailed(error)
+        }
+    }
+
+    // MARK: Private Functions
+
+    private func logRequest(_ request: URLRequest) {
+        let method = request.httpMethod ?? "UNKNOWN"
+        let url = request.url?.absoluteString ?? "NO URL"
+
+        logger.debug("Request: \(method) \(url)")
+
+        if let headers = request.allHTTPHeaderFields, !headers.isEmpty {
+            logger.debug("Headers: \(headers.description)")
+        }
+
+        if let body = request.httpBody,
+           let bodyString = String(data: body, encoding: .utf8),
+           !bodyString.isEmpty
+        {
+            logger.debug("Body: \(bodyString)")
+        }
+    }
+
+    private func logResponse(_ response: URLResponse?, data: Data?) {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            logger.warning("Invalid HTTPURLResponse")
+            return
+        }
+
+        let url = httpResponse.url?.absoluteString ?? "NO URL"
+        logger.debug("Response: \(httpResponse.statusCode) \(url)")
+
+        if let data,
+           let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers),
+           let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted),
+           let jsonString = String(data: prettyData, encoding: .utf8)
+        {
+            logger.debug("Response JSON: \(jsonString)")
+        } else if let data,
+                  let text = String(data: data, encoding: .utf8),
+                  !text.isEmpty
+        {
+            logger.debug("Response Text: \(text)")
         }
     }
 }
