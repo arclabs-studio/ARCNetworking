@@ -8,6 +8,9 @@
     },
     {
       "pattern": "^https://github.com/arclabs-studio/"
+    },
+    {
+      "pattern": "^https://img.shields.io/"
     }
   ],
   "replacementPatterns": [
