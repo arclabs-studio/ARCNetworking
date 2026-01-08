@@ -10,7 +10,11 @@ Designed for scalability, reusability, and clean architecture across Apple platf
 
 ---
 
-## Features
+## Overview
+
+ARCNetworking is a modern networking layer for Apple platforms that leverages Swift Concurrency for clean, safe, and efficient HTTP communication. It provides a layered architecture that separates concerns and promotes testability.
+
+**Key Features:**
 
 - Built with **Swift Concurrency** (`async/await`)
 - Clean architecture: **Builder -> Client -> Service**
@@ -60,7 +64,7 @@ Then add it to your target:
 
 ---
 
-## Quick Start
+## Usage
 
 ### 1. Define an Endpoint
 
@@ -206,9 +210,23 @@ Full API documentation is available via DocC.
 
 ---
 
-## License
+## Contributing
 
-MIT License - see [LICENSE](LICENSE) file.
+Contributions are welcome. Please follow these guidelines:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+Please ensure your code passes SwiftLint and all tests before submitting.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 

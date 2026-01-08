@@ -9,42 +9,44 @@ import Foundation
 import Testing
 @testable import ARCNetworking
 
+// MARK: - Test Fixtures
+
+private struct RequestBuilderPayload: Codable, Equatable {
+    let name: String
+}
+
+private struct MockRequestBuilderEndpoint: Endpoint {
+    typealias Response = RequestBuilderPayload
+
+    // swiftlint:disable:next force_unwrapping
+    var baseURL: URL { URL(string: "https://example.com")! }
+    var path: String { "api/v1/resource" }
+    var method: HTTPMethod { .POST }
+    var headers: [String: String]? { ["Content-Type": "application/json"] }
+    var queryItems: [URLQueryItem]? { [URLQueryItem(name: "flag", value: "true")] }
+    var body: Data? { try? JSONEncoder().encode(RequestBuilderPayload(name: "ARC")) }
+}
+
+private struct BodylessEndpoint: Endpoint {
+    typealias Response = [String: String]
+
+    // swiftlint:disable:next force_unwrapping
+    var baseURL: URL { URL(string: "https://example.com")! }
+    var path: String { "ping" }
+    var method: HTTPMethod { .GET }
+    var headers: [String: String]? { nil }
+    var queryItems: [URLQueryItem]? { nil }
+    var body: Data? { nil }
+}
+
+// MARK: - Tests
+
 @Suite("RequestBuilder")
 struct RequestBuilderTests {
-    // MARK: Mocks
-
-    private struct MockEndpoint: Endpoint {
-        struct Payload: Codable, Equatable {
-            let name: String
-        }
-
-        typealias Response = Payload
-
-        var baseURL: URL { URL(string: "https://example.com")! }
-        var path: String { "api/v1/resource" }
-        var method: HTTPMethod { .POST }
-        var headers: [String: String]? { ["Content-Type": "application/json"] }
-        var queryItems: [URLQueryItem]? { [URLQueryItem(name: "flag", value: "true")] }
-        var body: Data? { try? JSONEncoder().encode(Payload(name: "ARC")) }
-    }
-
-    private struct BodylessEndpoint: Endpoint {
-        typealias Response = [String: String]
-
-        var baseURL: URL { URL(string: "https://example.com")! }
-        var path: String { "ping" }
-        var method: HTTPMethod { .GET }
-        var headers: [String: String]? { nil }
-        var queryItems: [URLQueryItem]? { nil }
-        var body: Data? { nil }
-    }
-
-    // MARK: Tests
-
     @Test("Builds a URLRequest with all components")
     func buildRequestAppliesAllEndpointData() throws {
         let builder = RequestBuilder()
-        let endpoint = MockEndpoint()
+        let endpoint = MockRequestBuilderEndpoint()
 
         let request = try builder.buildRequest(from: endpoint)
 
@@ -53,7 +55,7 @@ struct RequestBuilderTests {
         #expect(request.url?.absoluteString == "https://example.com/api/v1/resource?flag=true")
 
         let body = try #require(request.httpBody)
-        let payload = try JSONDecoder().decode(MockEndpoint.Payload.self, from: body)
+        let payload = try JSONDecoder().decode(RequestBuilderPayload.self, from: body)
         #expect(payload == .init(name: "ARC"))
     }
 

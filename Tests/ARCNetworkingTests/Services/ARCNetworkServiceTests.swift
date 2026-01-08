@@ -9,57 +9,58 @@ import Foundation
 import Testing
 @testable import ARCNetworking
 
+// MARK: - Test Fixtures
+
+private struct ServiceResponseModel: Codable, Equatable {
+    let code: Int
+    let message: String
+}
+
+private struct MockServiceEndpoint: Endpoint {
+    typealias Response = ServiceResponseModel
+
+    // swiftlint:disable:next force_unwrapping
+    var baseURL: URL { URL(string: "https://service-tests.arcnetworking")! }
+    var path: String { "status" }
+    var method: HTTPMethod { .GET }
+    var headers: [String: String]? { nil }
+    var queryItems: [URLQueryItem]? { nil }
+    var body: Data? { nil }
+}
+
+// Mock client for testing - @unchecked Sendable since access is controlled in test context
+private final class MockHTTPClient: HTTPClientProtocol, @unchecked Sendable {
+    var callCount = 0
+    var receivedPaths: [String] = []
+    var executeClosure: ((Any) async throws -> Any)?
+
+    func execute<T>(_ endpoint: T) async throws -> T.Response where T: Endpoint {
+        callCount += 1
+        receivedPaths.append(endpoint.path)
+        guard let executeClosure else {
+            Issue.record("MockHTTPClient response was not stubbed")
+            throw HTTPError.unknown(URLError(.badServerResponse))
+        }
+        let anyResult = try await executeClosure(endpoint)
+        guard let typedResult = anyResult as? T.Response else {
+            fatalError("Response type \(type(of: anyResult)) does not match \(T.Response.self)")
+        }
+        return typedResult
+    }
+}
+
+// MARK: - Tests
+
 @Suite("ARCNetworkService", .serialized)
 struct ARCNetworkServiceTests {
-    // MARK: Mocks
-
-    private struct MockEndpoint: Endpoint {
-        struct ResponseModel: Codable, Equatable {
-            let code: Int
-            let message: String
-        }
-
-        typealias Response = ResponseModel
-
-        var baseURL: URL { URL(string: "https://service-tests.arcnetworking")! }
-        var path: String { "status" }
-        var method: HTTPMethod { .GET }
-        var headers: [String: String]? { nil }
-        var queryItems: [URLQueryItem]? { nil }
-        var body: Data? { nil }
-    }
-
-    // Mock client for testing - @unchecked Sendable since access is controlled in test context
-    private final class MockHTTPClient: HTTPClientProtocol, @unchecked Sendable {
-        var callCount = 0
-        var receivedPaths: [String] = []
-        var executeClosure: ((Any) async throws -> Any)?
-
-        func execute<T>(_ endpoint: T) async throws -> T.Response where T: Endpoint {
-            callCount += 1
-            receivedPaths.append(endpoint.path)
-            guard let executeClosure else {
-                Issue.record("MockHTTPClient response was not stubbed")
-                throw HTTPError.unknown(URLError(.badServerResponse))
-            }
-            let anyResult = try await executeClosure(endpoint)
-            guard let typedResult = anyResult as? T.Response else {
-                fatalError("Response type \(type(of: anyResult)) does not match \(T.Response.self)")
-            }
-            return typedResult
-        }
-    }
-
-    // MARK: Tests
-
     @Test("Delegates to the injected client")
     func requestUsesInjectedClient() async throws {
-        let endpoint = MockEndpoint()
-        let expectedResponse = MockEndpoint.ResponseModel(code: 200, message: "OK")
+        let endpoint = MockServiceEndpoint()
+        let expectedResponse = ServiceResponseModel(code: 200, message: "OK")
 
         let mockClient = MockHTTPClient()
         mockClient.executeClosure = { anyEndpoint in
-            #expect(anyEndpoint is MockEndpoint)
+            #expect(anyEndpoint is MockServiceEndpoint)
             return expectedResponse
         }
 
@@ -74,10 +75,11 @@ struct ARCNetworkServiceTests {
     @Test("End-to-end integration using the real HTTPClient")
     func requestEndToEnd() async throws {
         defer { unregisterHandler() }
-        let endpoint = MockEndpoint()
-        let expectedResponse = MockEndpoint.ResponseModel(code: 201, message: "created")
+        let endpoint = MockServiceEndpoint()
+        let expectedResponse = ServiceResponseModel(code: 201, message: "created")
 
         registerHandler { request in
+            // swiftlint:disable:next force_unwrapping
             let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
             let data = try JSONEncoder().encode(expectedResponse)
             return (response, data)
@@ -91,7 +93,7 @@ struct ARCNetworkServiceTests {
 
     @Test("Propagates HTTPError instances thrown by the client")
     func requestPropagatesHTTPError() async {
-        let endpoint = MockEndpoint()
+        let endpoint = MockServiceEndpoint()
         let expectedError = HTTPError.requestFailed(500)
 
         let mockClient = MockHTTPClient()

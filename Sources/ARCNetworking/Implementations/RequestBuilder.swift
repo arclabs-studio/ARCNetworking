@@ -11,7 +11,6 @@ import Foundation
 ///
 /// `RequestBuilder` is the default implementation of ``RequestBuilderProtocol``.
 public struct RequestBuilder: RequestBuilderProtocol {
-
     // MARK: Initialization
 
     /// Creates a new request builder.

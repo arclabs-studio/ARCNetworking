@@ -9,40 +9,42 @@ import Foundation
 import Testing
 @testable import ARCNetworking
 
+// MARK: - Test Fixtures
+
+private struct HTTPClientResponseModel: Codable, Equatable {
+    let id: Int
+    let title: String
+}
+
+private struct MockHTTPClientEndpoint: Endpoint {
+    typealias Response = HTTPClientResponseModel
+
+    // swiftlint:disable:next force_unwrapping
+    var baseURL: URL { URL(string: "https://client-tests.arcnetworking")! }
+    var path: String { "articles/42" }
+    var method: HTTPMethod { .GET }
+    var headers: [String: String]? { nil }
+    var queryItems: [URLQueryItem]? { nil }
+    var body: Data? { nil }
+}
+
+// MARK: - Tests
+
 @Suite("HTTPClient", .serialized)
 struct HTTPClientTests {
-    // MARK: Mocks
-
-    private struct MockEndpoint: Endpoint {
-        struct ResponseModel: Codable, Equatable {
-            let id: Int
-            let title: String
-        }
-
-        typealias Response = ResponseModel
-
-        var baseURL: URL { URL(string: "https://client-tests.arcnetworking")! }
-        var path: String { "articles/42" }
-        var method: HTTPMethod { .GET }
-        var headers: [String: String]? { nil }
-        var queryItems: [URLQueryItem]? { nil }
-        var body: Data? { nil }
-    }
-
-    // MARK: Tests
-
     @Test("Decodes a successful response")
     func executeReturnsDecodedResponse() async throws {
         defer { unregisterHandler() }
-        let expectedModel = MockEndpoint.ResponseModel(id: 42, title: "ARC Networking Rocks")
+        let expectedModel = HTTPClientResponseModel(id: 42, title: "ARC Networking Rocks")
         registerHandler { request in
             #expect(request.url?.absoluteString == "https://client-tests.arcnetworking/articles/42")
+            // swiftlint:disable:next force_unwrapping
             let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
             let data = try JSONEncoder().encode(expectedModel)
             return (response, data)
         }
 
-        let endpoint = MockEndpoint()
+        let endpoint = MockHTTPClientEndpoint()
         let sut = makeSUT()
 
         let result = try await sut.execute(endpoint)
@@ -53,11 +55,12 @@ struct HTTPClientTests {
     func executeThrowsForHTTPError() async {
         defer { unregisterHandler() }
         registerHandler { request in
+            // swiftlint:disable:next force_unwrapping
             let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
             return (response, Data())
         }
 
-        let endpoint = MockEndpoint()
+        let endpoint = MockHTTPClientEndpoint()
         let sut = makeSUT()
 
         do {
@@ -78,12 +81,13 @@ struct HTTPClientTests {
     func executeThrowsForDecodingError() async {
         defer { unregisterHandler() }
         registerHandler { request in
+            // swiftlint:disable:next force_unwrapping
             let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
             let invalidJSON = Data("{\"unexpected\":true}".utf8)
             return (response, invalidJSON)
         }
 
-        let endpoint = MockEndpoint()
+        let endpoint = MockHTTPClientEndpoint()
         let sut = makeSUT()
 
         do {
@@ -105,6 +109,7 @@ struct HTTPClientTests {
         defer { unregisterHandler() }
         registerHandler { request in
             let response = URLResponse(
+                // swiftlint:disable:next force_unwrapping
                 url: request.url!,
                 mimeType: nil,
                 expectedContentLength: 0,
@@ -113,7 +118,7 @@ struct HTTPClientTests {
             return (response, Data())
         }
 
-        let endpoint = MockEndpoint()
+        let endpoint = MockHTTPClientEndpoint()
         let sut = makeSUT()
 
         do {
@@ -137,7 +142,7 @@ struct HTTPClientTests {
             throw URLError(.notConnectedToInternet)
         }
 
-        let endpoint = MockEndpoint()
+        let endpoint = MockHTTPClientEndpoint()
         let sut = makeSUT()
 
         do {
