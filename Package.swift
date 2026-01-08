@@ -24,11 +24,20 @@ let package = Package(
         )
     ],
 
+    // MARK: - Dependencies
+
+    dependencies: [
+        .package(url: "https://github.com/arclabs-studio/ARCLogger.git", from: "1.0.0")
+    ],
+
     // MARK: - Targets
 
     targets: [
         .target(
             name: "ARCNetworking",
+            dependencies: [
+                .product(name: "ARCLogger", package: "ARCLogger")
+            ],
             path: "Sources/ARCNetworking",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency")
