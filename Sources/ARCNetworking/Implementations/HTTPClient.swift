@@ -86,8 +86,7 @@ public final class HTTPClient: HTTPClientProtocol {
 
         if let body = request.httpBody,
            let bodyString = String(data: body, encoding: .utf8),
-           !bodyString.isEmpty
-        {
+           !bodyString.isEmpty {
             logger.debug("Body: \(bodyString)")
         }
     }
@@ -104,13 +103,11 @@ public final class HTTPClient: HTTPClientProtocol {
         if let data,
            let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers),
            let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted),
-           let jsonString = String(data: prettyData, encoding: .utf8)
-        {
+           let jsonString = String(data: prettyData, encoding: .utf8) {
             logger.debug("Response JSON: \(jsonString)")
         } else if let data,
                   let text = String(data: data, encoding: .utf8),
-                  !text.isEmpty
-        {
+                  !text.isEmpty {
             logger.debug("Response Text: \(text)")
         }
     }

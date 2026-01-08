@@ -57,5 +57,8 @@
 --marktypes always
 --extensionacl on-declarations
 
+# Disabled rules (conflicts with SwiftLint)
+--disable wrapMultilineStatementBraces
+
 # Exclude
 --exclude .build,DerivedData,Pods,Carthage,Generated
