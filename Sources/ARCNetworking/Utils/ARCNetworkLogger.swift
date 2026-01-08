@@ -2,69 +2,82 @@
 //  ARCNetworkLogger.swift
 //  ARCNetworking
 //
-//  Created by ARC Labs on 24/10/25.
+//  Created by ARC Labs Studio on 24/10/25.
 //
 
 import Foundation
 import os
 
+/// A logger for network requests and responses using `os.Logger`.
+///
+/// `ARCNetworkLogger` provides structured logging for debugging network operations.
+/// Logging is only active in DEBUG builds.
 public enum ARCNetworkLogger {
-    
     // MARK: Private Properties
 
     private static let logger = Logger(subsystem: "com.arclabs-studio.arcnetworking", category: "HTTP")
-    
+
     // MARK: Public Functions
-    
+
+    /// Logs an outgoing HTTP request.
+    ///
+    /// - Parameter request: The URL request being sent.
     public static func log(request: URLRequest) {
         #if DEBUG
-        print("\n🔵 [NETWORK] ---------------------------------------------")
-        print("➡️ Request: \(request.httpMethod ?? "") \(request.url?.absoluteString ?? "")")
-        
+        let method = request.httpMethod ?? "UNKNOWN"
+        let url = request.url?.absoluteString ?? "NO URL"
+
+        logger.debug("➡️ Request: \(method) \(url)")
+
         if let headers = request.allHTTPHeaderFields, !headers.isEmpty {
-            print("📦 Headers:")
-            headers.forEach { print("   \($0): \($1)") }
+            logger.debug("📦 Headers: \(headers.description)")
         }
-        
+
         if let body = request.httpBody,
            let bodyString = String(data: body, encoding: .utf8),
-           !bodyString.isEmpty {
-            print("📨 Body:\n\(bodyString)")
+           !bodyString.isEmpty
+        {
+            logger.debug("📨 Body: \(bodyString)")
         }
-        
-        logger.debug("➡️ Request: \(request.httpMethod ?? "") \(request.url?.absoluteString ?? "")")
         #endif
     }
-    
+
+    /// Logs an incoming HTTP response.
+    ///
+    /// - Parameters:
+    ///   - response: The URL response received.
+    ///   - data: The response data.
     public static func log(response: URLResponse?, data: Data?) {
         #if DEBUG
         guard let httpResponse = response as? HTTPURLResponse else {
-            print("❌ No valid HTTPURLResponse")
+            logger.warning("❌ Invalid HTTPURLResponse")
             return
         }
-        
-        print("⬅️ Response: \(httpResponse.statusCode) \(httpResponse.url?.absoluteString ?? "")")
-        
-        if let data = data,
+
+        let url = httpResponse.url?.absoluteString ?? "NO URL"
+        logger.debug("⬅️ Response: \(httpResponse.statusCode) \(url)")
+
+        if let data,
            let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers),
            let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted),
-           let jsonString = String(data: prettyData, encoding: .utf8) {
-            print("📦 Response JSON:\n\(jsonString)")
-        } else if let data = data,
+           let jsonString = String(data: prettyData, encoding: .utf8)
+        {
+            logger.debug("📦 Response JSON: \(jsonString)")
+        } else if let data,
                   let text = String(data: data, encoding: .utf8),
-                  !text.isEmpty {
-            print("📦 Response Text:\n\(text)")
+                  !text.isEmpty
+        {
+            logger.debug("📦 Response Text: \(text)")
         }
-        
-        print("----------------------------------------------------------\n")
-        logger.debug("⬅️ Response: \(httpResponse.statusCode) \(httpResponse.url?.absoluteString ?? "")")
         #endif
     }
-    
+
+    /// Logs an error that occurred during a network operation.
+    ///
+    /// - Parameter error: The error to log.
     public static func log(error: Error) {
         #if DEBUG
-        print("❌ [ERROR] \(error.localizedDescription)")
-        logger.error("❌ \(error.localizedDescription, privacy: .public)")
+        logger.error("❌ Error: \(error.localizedDescription, privacy: .public)")
         #endif
     }
 }
