@@ -34,7 +34,7 @@ struct StreamingView: View {
                     }
                 }
             }
-            .navigationTitle("SSE Streaming")
+            .navigationTitle("Streaming")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     if isStreaming {

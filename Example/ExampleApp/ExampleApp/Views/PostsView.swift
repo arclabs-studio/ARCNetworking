@@ -46,7 +46,7 @@ struct PostsView: View {
                     }
                 }
             }
-            .navigationTitle("Posts (httpFields)")
+            .navigationTitle("Posts")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
