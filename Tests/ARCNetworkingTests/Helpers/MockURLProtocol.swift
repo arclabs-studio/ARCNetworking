@@ -16,21 +16,15 @@ class MockURLProtocol: URLProtocol {
     private nonisolated(unsafe) static var handlers: [String: Handler] = [:]
 
     static func register(_ handler: @escaping Handler, for host: String) {
-        lock.lock()
-        handlers[host] = handler
-        lock.unlock()
+        lock.withLock { handlers[host] = handler }
     }
 
     static func unregister(host: String) {
-        lock.lock()
-        handlers.removeValue(forKey: host)
-        lock.unlock()
+        lock.withLock { _ = handlers.removeValue(forKey: host) }
     }
 
     private static func handler(for host: String) -> Handler? {
-        lock.lock()
-        defer { lock.unlock() }
-        return handlers[host]
+        lock.withLock { handlers[host] }
     }
 
     override class func canInit(with _: URLRequest) -> Bool {
