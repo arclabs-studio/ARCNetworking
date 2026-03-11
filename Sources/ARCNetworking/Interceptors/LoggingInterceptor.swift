@@ -24,6 +24,10 @@ public final class LoggingInterceptor: RequestInterceptor, @unchecked Sendable {
 
     // MARK: RequestInterceptor
 
+    /// Logs the outgoing request and incoming response (debug builds only),
+    /// then forwards both unchanged through the chain.
+    ///
+    /// - SeeAlso: ``RequestInterceptor/intercept(_:next:)``
     // swiftformat:disable wrapArguments
     public func intercept(_ request: URLRequest,
                           next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse)) async throws

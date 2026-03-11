@@ -75,6 +75,16 @@ public final class HTTPClient: HTTPClientProtocol {
 
     // MARK: Public Functions
 
+    /// Streams an HTTP response as an `AsyncThrowingStream` of `Data` chunks.
+    ///
+    /// Uses `URLSession.bytes(for:)` and delivers one chunk per response line,
+    /// making it ideal for SSE (Server-Sent Events) and other line-delimited formats.
+    ///
+    /// - Parameter endpoint: The endpoint defining the request parameters.
+    /// - Returns: An `AsyncThrowingStream` delivering response data line by line.
+    /// - Throws: `HTTPError.requestFailed` on non-2xx responses;
+    ///           `HTTPError.unknown` if the response is not an `HTTPURLResponse`;
+    ///           `CancellationError` if the consuming task is cancelled.
     public func stream(_ endpoint: some Endpoint) -> AsyncThrowingStream<Data, Error> {
         // Build the request synchronously so endpoint is not captured across concurrency boundaries.
         let requestResult = Result { try builder.buildRequest(from: endpoint) }
