@@ -26,5 +26,6 @@ xcuserdata/
 *credentials*
 *.mobileprovision
 # Archivos de configuración local
+.claude/
 .claude-code/
 *.local

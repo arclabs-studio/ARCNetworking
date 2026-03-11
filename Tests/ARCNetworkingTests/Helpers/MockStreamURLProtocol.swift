@@ -1,21 +1,24 @@
 //
-//  MockURLProtocol.swift
+//  MockStreamURLProtocol.swift
 //  ARCNetworking
 //
-//  Created by ARC Labs Studio on 24/10/25.
+//  Created by ARC Labs Studio on 11/03/26.
 //
 
 import Foundation
 
-/// Intercepts URLSession requests during tests to provide deterministic responses.
-class MockURLProtocol: URLProtocol {
-    typealias Handler = (URLRequest) throws -> (URLResponse, Data)
+/// Intercepts URLSession streaming requests during tests, delivering bytes in configurable chunks.
+///
+/// Use ``MockStreamURLProtocol/register(_:for:)`` to provide a handler per hostname.
+/// The handler returns `(HTTPURLResponse, [Data])` where each `Data` element is delivered
+/// as a separate chunk, simulating incremental streaming (e.g., SSE).
+class MockStreamURLProtocol: URLProtocol {
+    typealias StreamHandler = (URLRequest) throws -> (URLResponse, [Data])
 
     private static let lock = NSLock()
-    /// Protected by lock - safe for concurrent access
-    private nonisolated(unsafe) static var handlers: [String: Handler] = [:]
+    private nonisolated(unsafe) static var handlers: [String: StreamHandler] = [:]
 
-    static func register(_ handler: @escaping Handler, for host: String) {
+    static func register(_ handler: @escaping StreamHandler, for host: String) {
         lock.withLock { handlers[host] = handler }
     }
 
@@ -23,7 +26,7 @@ class MockURLProtocol: URLProtocol {
         lock.withLock { _ = handlers.removeValue(forKey: host) }
     }
 
-    private static func handler(for host: String) -> Handler? {
+    private static func handler(for host: String) -> StreamHandler? {
         lock.withLock { handlers[host] }
     }
 
@@ -44,9 +47,11 @@ class MockURLProtocol: URLProtocol {
         }
 
         do {
-            let (response, data) = try handler(request)
+            let (response, chunks) = try handler(request)
             client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: data)
+            for chunk in chunks {
+                client?.urlProtocol(self, didLoad: chunk)
+            }
             client?.urlProtocolDidFinishLoading(self)
         } catch {
             client?.urlProtocol(self, didFailWithError: error)

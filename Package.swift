@@ -3,54 +3,38 @@
 
 import PackageDescription
 
-let package = Package(
-    name: "ARCNetworking",
+let package = Package(name: "ARCNetworking",
 
-    // MARK: - Platforms
+                      // MARK: - Platforms
 
-    platforms: [
-        .iOS(.v17),
-        .macOS(.v14),
-        .tvOS(.v17),
-        .watchOS(.v10)
-    ],
+                      platforms: [.iOS(.v17),
+                                  .macOS(.v14),
+                                  .tvOS(.v17),
+                                  .watchOS(.v10)],
 
-    // MARK: - Products
+                      // MARK: - Products
 
-    products: [
-        .library(
-            name: "ARCNetworking",
-            targets: ["ARCNetworking"]
-        )
-    ],
+                      products: [.library(name: "ARCNetworking",
+                                          targets: ["ARCNetworking"])],
 
-    // MARK: - Dependencies
+                      // MARK: - Dependencies
 
-    dependencies: [
-        .package(url: "https://github.com/arclabs-studio/ARCLogger.git", from: "1.0.0")
-    ],
+                      dependencies: [.package(url: "https://github.com/arclabs-studio/ARCLogger.git", from: "1.0.0"),
+                                     .package(url: "https://github.com/apple/swift-http-types", from: "1.0.0")],
 
-    // MARK: - Targets
+                      // MARK: - Targets
 
-    targets: [
-        .target(
-            name: "ARCNetworking",
-            dependencies: [
-                .product(name: "ARCLogger", package: "ARCLogger")
-            ],
-            path: "Sources/ARCNetworking",
-            swiftSettings: [
-                .enableUpcomingFeature("StrictConcurrency")
-            ]
-        ),
-        .testTarget(
-            name: "ARCNetworkingTests",
-            dependencies: ["ARCNetworking"],
-            path: "Tests/ARCNetworkingTests"
-        )
-    ],
+                      targets: [.target(name: "ARCNetworking",
+                                        dependencies: [.product(name: "ARCLogger", package: "ARCLogger"),
+                                                       .product(name: "HTTPTypes", package: "swift-http-types"),
+                                                       .product(name: "HTTPTypesFoundation",
+                                                                package: "swift-http-types")],
+                                        path: "Sources/ARCNetworking",
+                                        swiftSettings: [.enableUpcomingFeature("StrictConcurrency")]),
+                                .testTarget(name: "ARCNetworkingTests",
+                                            dependencies: ["ARCNetworking"],
+                                            path: "Tests/ARCNetworkingTests")],
 
-    // MARK: - Swift Language
+                      // MARK: - Swift Language
 
-    swiftLanguageModes: [.v6]
-)
+                      swiftLanguageModes: [.v6])

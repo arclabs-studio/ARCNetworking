@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import HTTPTypes
 
 /// A protocol that defines the components of an HTTP endpoint.
 ///
@@ -42,6 +43,9 @@ public protocol Endpoint {
     var method: HTTPMethod { get }
 
     /// Optional HTTP headers to include in the request.
+    ///
+    /// - Note: Prefer ``httpFields`` for typed header access when adopting `swift-http-types`.
+    ///   `headers` remains supported for backwards compatibility.
     var headers: [String: String]? { get }
 
     /// Optional query items to append to the URL.
@@ -49,4 +53,23 @@ public protocol Endpoint {
 
     /// Optional body data for the request.
     var body: Data? { get }
+
+    /// Optional HTTP fields using the type-safe `HTTPTypes` package.
+    ///
+    /// When non-nil, `RequestBuilder` will use `HTTPTypes` to construct the request,
+    /// enabling type-safe header access and alignment with the Swift community's unified HTTP model.
+    ///
+    /// - Note: This property is a protocol requirement (not just an extension default) so that
+    ///   overrides are dispatched correctly through existentials and generics.
+    ///   Existing conformers that do not implement this property use the extension default (`nil`),
+    ///   which preserves backwards compatibility.
+    var httpFields: HTTPFields? { get }
+}
+
+extension Endpoint {
+    /// Default implementation returns `nil`, preserving backwards compatibility.
+    /// Existing conformers require no changes.
+    public var httpFields: HTTPFields? {
+        nil
+    }
 }

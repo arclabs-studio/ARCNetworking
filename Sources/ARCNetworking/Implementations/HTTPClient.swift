@@ -5,7 +5,6 @@
 //  Created by ARC Labs Studio on 24/10/25.
 //
 
-import ARCLogger
 import Foundation
 
 /// A concrete HTTP client that executes network requests using `URLSession`.
@@ -13,11 +12,21 @@ import Foundation
 /// `HTTPClient` is the default implementation of ``HTTPClientProtocol`` that handles
 /// request building, execution, and response decoding.
 ///
+/// Interceptors are composed into a chain at initialisation time and executed in declaration
+/// order. The default chain contains ``LoggingInterceptor``, preserving v1.0 behaviour.
+///
 /// ## Example
 ///
 /// ```swift
+/// // Default — identical behaviour to v1.0
 /// let client = HTTPClient()
-/// let response = try await client.execute(myEndpoint)
+///
+/// // With Firebase auth injection
+/// let client = HTTPClient(interceptors: [
+///     AuthenticationInterceptor { try await Auth.auth().currentUser!.getIDToken() },
+///     RetryInterceptor(maxRetries: 2),
+///     LoggingInterceptor()
+/// ])
 /// ```
 public final class HTTPClient: HTTPClientProtocol {
     // MARK: Private Properties
@@ -25,7 +34,7 @@ public final class HTTPClient: HTTPClientProtocol {
     private let session: URLSession
     private let builder: RequestBuilderProtocol
     private let decoder: JSONDecoder
-    private let logger = ARCLogger(subsystem: "com.arclabs-studio.arcnetworking", category: "HTTP")
+    private let chain: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse)
 
     // MARK: Initialization
 
@@ -35,80 +44,98 @@ public final class HTTPClient: HTTPClientProtocol {
     ///   - session: The URL session to use for requests. Defaults to `.shared`.
     ///   - builder: The request builder to transform endpoints. Defaults to `RequestBuilder()`.
     ///   - decoder: The JSON decoder for response parsing. Defaults to `JSONDecoder()`.
-    public init(
-        session: URLSession = .shared,
-        builder: RequestBuilderProtocol = RequestBuilder(),
-        decoder: JSONDecoder = JSONDecoder()
-    ) {
+    ///   - interceptors: Middleware applied to every request in declaration order.
+    ///                   Defaults to `[LoggingInterceptor()]` for backwards compatibility.
+    public init(session: URLSession = .shared,
+                builder: RequestBuilderProtocol = RequestBuilder(),
+                decoder: JSONDecoder = JSONDecoder(),
+                interceptors: [any RequestInterceptor] = [LoggingInterceptor()]) {
         self.session = session
         self.builder = builder
         self.decoder = decoder
+
+        // Base transport handler — sole point of URLSession usage.
+        // TODO: Migrate to Swift unified HTTP client when available (swift-evolution vision)
+        let base: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { [session] req in
+            let (data, response) = try await session.data(for: req)
+            guard let http = response as? HTTPURLResponse else {
+                throw HTTPError.unknown(NSError(domain: "Invalid response", code: 0))
+            }
+            return (data, http)
+        }
+
+        // Fold interceptors right-to-left so interceptors[0] executes first.
+        chain = interceptors.reversed().reduce(base) { next, interceptor in
+            let capturedNext = next
+            return { @Sendable [interceptor] (req: URLRequest) in
+                try await interceptor.intercept(req, next: capturedNext)
+            }
+        }
     }
 
     // MARK: Public Functions
 
-    public func execute<T>(_ endpoint: T) async throws -> T.Response where T: Endpoint {
-        let request = try builder.buildRequest(from: endpoint)
+    /// Streams an HTTP response as an `AsyncThrowingStream` of `Data` chunks.
+    ///
+    /// Uses `URLSession.bytes(for:)` and delivers one chunk per response line,
+    /// making it ideal for SSE (Server-Sent Events) and other line-delimited formats.
+    ///
+    /// - Parameter endpoint: The endpoint defining the request parameters.
+    /// - Returns: An `AsyncThrowingStream` delivering response data line by line.
+    /// - Throws: `HTTPError.requestFailed` on non-2xx responses;
+    ///           `HTTPError.unknown` if the response is not an `HTTPURLResponse`;
+    ///           `CancellationError` if the consuming task is cancelled.
+    public func stream(_ endpoint: some Endpoint) -> AsyncThrowingStream<Data, Error> {
+        // Build the request synchronously so endpoint is not captured across concurrency boundaries.
+        let requestResult = Result { try builder.buildRequest(from: endpoint) }
+        return AsyncThrowingStream { continuation in
+            Task { [session] in
+                do {
+                    let request = try requestResult.get()
+                    let (bytes, response) = try await session.bytes(for: request)
 
-        logRequest(request)
+                    guard let http = response as? HTTPURLResponse else {
+                        continuation.finish(throwing: HTTPError.unknown(NSError(domain: "Invalid response", code: 0)))
+                        return
+                    }
 
-        let (data, response) = try await session.data(for: request)
+                    guard HTTPStatusCode.successRange.contains(http.statusCode) else {
+                        continuation.finish(throwing: HTTPError.requestFailed(http.statusCode))
+                        return
+                    }
 
-        logResponse(response, data: data)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw HTTPError.unknown(NSError(domain: "Invalid response", code: 0))
+                    for try await line in bytes.lines {
+                        continuation.yield(Data(line.utf8))
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
         }
+    }
 
-        guard HTTPStatusCode.successRange.contains(httpResponse.statusCode) else {
-            throw HTTPError.requestFailed(httpResponse.statusCode)
+    /// Executes a request for the given endpoint and decodes the JSON response.
+    ///
+    /// Runs the request through the interceptor chain before hitting the network.
+    ///
+    /// - Parameter endpoint: The endpoint defining the request parameters and expected response type.
+    /// - Returns: The decoded response of type `T.Response`.
+    /// - Throws: ``HTTPError/invalidURL`` if the URL is malformed;
+    ///           ``HTTPError/requestFailed(_:)`` on non-2xx status codes;
+    ///           ``HTTPError/decodingFailed(_:)`` if the response cannot be decoded.
+    public func execute<T: Endpoint>(_ endpoint: T) async throws -> T.Response {
+        let request = try builder.buildRequest(from: endpoint)
+        let (data, response) = try await chain(request)
+
+        guard HTTPStatusCode.successRange.contains(response.statusCode) else {
+            throw HTTPError.requestFailed(response.statusCode)
         }
 
         do {
             return try decoder.decode(T.Response.self, from: data)
         } catch {
-            logger.error("Decoding failed", metadata: ["error": .public(error.localizedDescription)])
             throw HTTPError.decodingFailed(error)
-        }
-    }
-
-    // MARK: Private Functions
-
-    private func logRequest(_ request: URLRequest) {
-        let method = request.httpMethod ?? "UNKNOWN"
-        let url = request.url?.absoluteString ?? "NO URL"
-
-        logger.debug("Request: \(method) \(url)")
-
-        if let headers = request.allHTTPHeaderFields, !headers.isEmpty {
-            logger.debug("Headers: \(headers.description)")
-        }
-
-        if let body = request.httpBody,
-           let bodyString = String(data: body, encoding: .utf8),
-           !bodyString.isEmpty {
-            logger.debug("Body: \(bodyString)")
-        }
-    }
-
-    private func logResponse(_ response: URLResponse?, data: Data?) {
-        guard let httpResponse = response as? HTTPURLResponse else {
-            logger.warning("Invalid HTTPURLResponse")
-            return
-        }
-
-        let url = httpResponse.url?.absoluteString ?? "NO URL"
-        logger.debug("Response: \(httpResponse.statusCode) \(url)")
-
-        if let data,
-           let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers),
-           let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted),
-           let jsonString = String(data: prettyData, encoding: .utf8) {
-            logger.debug("Response JSON: \(jsonString)")
-        } else if let data,
-                  let text = String(data: data, encoding: .utf8),
-                  !text.isEmpty {
-            logger.debug("Response Text: \(text)")
         }
     }
 }

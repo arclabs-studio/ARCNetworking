@@ -19,21 +19,36 @@ private struct HTTPClientResponseModel: Codable, Equatable {
 private struct MockHTTPClientEndpoint: Endpoint {
     typealias Response = HTTPClientResponseModel
 
-    // swiftlint:disable:next force_unwrapping
-    var baseURL: URL { URL(string: "https://client-tests.arcnetworking")! }
-    var path: String { "articles/42" }
-    var method: HTTPMethod { .GET }
-    var headers: [String: String]? { nil }
-    var queryItems: [URLQueryItem]? { nil }
-    var body: Data? { nil }
+    var baseURL: URL {
+        // swiftlint:disable:next force_unwrapping
+        URL(string: "https://client-tests.arcnetworking")!
+    }
+
+    var path: String {
+        "articles/42"
+    }
+
+    var method: HTTPMethod {
+        .GET
+    }
+
+    var headers: [String: String]? {
+        nil
+    }
+
+    var queryItems: [URLQueryItem]? {
+        nil
+    }
+
+    var body: Data? {
+        nil
+    }
 }
 
 // MARK: - Tests
 
-@Suite("HTTPClient", .serialized)
-struct HTTPClientTests {
-    @Test("Decodes a successful response")
-    func executeReturnsDecodedResponse() async throws {
+@Suite("HTTPClient", .serialized) struct HTTPClientTests {
+    @Test("Decodes a successful response") func executeReturnsDecodedResponse() async throws {
         defer { unregisterHandler() }
         let expectedModel = HTTPClientResponseModel(id: 42, title: "ARC Networking Rocks")
         registerHandler { request in
@@ -51,8 +66,7 @@ struct HTTPClientTests {
         #expect(result == expectedModel)
     }
 
-    @Test("Propagates errors for non-2xx status codes")
-    func executeThrowsForHTTPError() async {
+    @Test("Propagates errors for non-2xx status codes") func executeThrowsForHTTPError() async {
         defer { unregisterHandler() }
         registerHandler { request in
             // swiftlint:disable:next force_unwrapping
@@ -77,8 +91,7 @@ struct HTTPClientTests {
         }
     }
 
-    @Test("Throws HTTPError.decodingFailed when decoding fails")
-    func executeThrowsForDecodingError() async {
+    @Test("Throws HTTPError.decodingFailed when decoding fails") func executeThrowsForDecodingError() async {
         defer { unregisterHandler() }
         registerHandler { request in
             // swiftlint:disable:next force_unwrapping
@@ -108,13 +121,11 @@ struct HTTPClientTests {
     func executeThrowsUnknownForNonHTTPResponse() async {
         defer { unregisterHandler() }
         registerHandler { request in
-            let response = URLResponse(
-                // swiftlint:disable:next force_unwrapping
+            let response = URLResponse(// swiftlint:disable:next force_unwrapping
                 url: request.url!,
                 mimeType: nil,
                 expectedContentLength: 0,
-                textEncodingName: nil
-            )
+                textEncodingName: nil)
             return (response, Data())
         }
 
@@ -135,8 +146,7 @@ struct HTTPClientTests {
         }
     }
 
-    @Test("Propagates URLSession transport errors")
-    func executePropagatesTransportError() async {
+    @Test("Propagates URLSession transport errors") func executePropagatesTransportError() async {
         defer { unregisterHandler() }
         registerHandler { _ in
             throw URLError(.notConnectedToInternet)
