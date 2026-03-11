@@ -71,7 +71,7 @@ extension LoggingInterceptor {
         let url = response.url?.absoluteString ?? "NO URL"
         logger.debug("Response: \(response.statusCode) \(url)")
 
-        if let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers),
+        if let jsonObject = try? JSONSerialization.jsonObject(with: data),
            let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted),
            let jsonString = String(data: prettyData, encoding: .utf8) {
             logger.debug("Response JSON: \(jsonString)")
