@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -23,7 +23,7 @@
 /* Begin PBXFileReference section */
 		15D5BDECF11BD8C366AC5BD7 /* PostRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostRowView.swift; sourceTree = "<group>"; };
 		18AEC60A6B2647750457F1B9 /* NetworkClientFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClientFactory.swift; sourceTree = "<group>"; };
-		1B1D41704ED4D178919BD187 /* ARCNetworkingDemoApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ARCNetworkingDemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B1D41704ED4D178919BD187 /* ARCNetworking Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ARCNetworking Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C4963E402FF533058B3FB55 /* PostsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostsView.swift; sourceTree = "<group>"; };
 		66389F57B5AB912645F4FE69 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8032739D3575F9AA3463A810 /* PostDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailView.swift; sourceTree = "<group>"; };
@@ -108,7 +108,7 @@
 		EC698D29E3CC03A74A817517 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1B1D41704ED4D178919BD187 /* ARCNetworkingDemoApp.app */,
+				1B1D41704ED4D178919BD187 /* ARCNetworking Demo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -133,7 +133,7 @@
 				CAB3A63DAB5A85E429AD9ED8 /* ARCNetworking */,
 			);
 			productName = ARCNetworkingDemoApp;
-			productReference = 1B1D41704ED4D178919BD187 /* ARCNetworkingDemoApp.app */;
+			productReference = 1B1D41704ED4D178919BD187 /* ARCNetworking Demo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -144,11 +144,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-					88AA63BA512ABF58ED9568EA = {
-						DevelopmentTeam = "";
-					};
-				};
 			};
 			buildConfigurationList = 71CEC5B6C29C9D82A4AF964F /* Build configuration list for PBXProject "ARCNetworkingDemoApp" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -163,7 +158,6 @@
 			packageReferences = (
 				F791F3C3F74361049784BAE4 /* XCLocalSwiftPackageReference "../.." */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -267,7 +261,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4W652PD582;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_GENERATION_MODE = GeneratedFile;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -354,7 +348,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4W652PD582;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_GENERATION_MODE = GeneratedFile;
 				LD_RUNPATH_SEARCH_PATHS = (
