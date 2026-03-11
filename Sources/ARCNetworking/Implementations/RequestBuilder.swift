@@ -55,12 +55,17 @@ public struct RequestBuilder: RequestBuilderProtocol {
 // MARK: - Private
 
 extension RequestBuilder {
-    private func buildRequestUsingHTTPTypes(url: URL,
-                                            endpoint: any Endpoint,
-                                            fields: HTTPFields) -> URLRequest {
+    private func makeBaseRequest(url: URL, endpoint: any Endpoint) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = endpoint.method.rawValue
         request.httpBody = endpoint.body
+        return request
+    }
+
+    private func buildRequestUsingHTTPTypes(url: URL,
+                                            endpoint: any Endpoint,
+                                            fields: HTTPFields) -> URLRequest {
+        var request = makeBaseRequest(url: url, endpoint: endpoint)
         // Apply typed HTTP fields from HTTPTypes to the URLRequest.
         // HTTPFields provides type-safe header access; HTTPTypesFoundation bridges to URLRequest.
         for field in fields {
@@ -70,9 +75,7 @@ extension RequestBuilder {
     }
 
     private func buildRequestLegacy(url: URL, endpoint: any Endpoint) -> URLRequest {
-        var request = URLRequest(url: url)
-        request.httpMethod = endpoint.method.rawValue
-        request.httpBody = endpoint.body
+        var request = makeBaseRequest(url: url, endpoint: endpoint)
         endpoint.headers?.forEach { request.addValue($1, forHTTPHeaderField: $0) }
         return request
     }
