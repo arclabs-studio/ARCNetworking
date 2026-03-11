@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `swift-http-types` integration: `Endpoint.httpFields: HTTPFields?` extension (type-safe headers via `HTTPTypesFoundation`)
+- Composable `RequestInterceptor` middleware protocol for request/response pipeline
+- `AuthenticationInterceptor` — injects Bearer tokens from any async provider (Firebase Auth, Keychain, etc.)
+- `RetryInterceptor` — exponential backoff retry on HTTP 5xx with injectable sleep for testability
+- `LoggingInterceptor` — structured logging via ARCLogger (`#if DEBUG` gated)
+- SSE/streaming support: `HTTPClientProtocol.stream(_:) -> AsyncThrowingStream<Data, Error>`
+
+### Changed
+
+- `HTTPClient.init` now accepts `interceptors: [any RequestInterceptor]` (default: `[LoggingInterceptor()]`, preserving v1.0 logging behaviour)
+- Inline logging in `HTTPClient` moved to `LoggingInterceptor`
+- `RequestBuilder` now uses `HTTPTypesFoundation` bridge when `endpoint.httpFields` is non-nil; falls back to legacy `headers: [String: String]?` path
+
 ## [1.0.0] - 2026-01-08
 
 ### Added
