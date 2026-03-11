@@ -31,11 +31,9 @@ struct ContentView: View {
                         }
                     }
                 } else if posts.isEmpty {
-                    ContentUnavailableView(
-                        "No Posts",
-                        systemImage: "doc.text",
-                        description: Text("Tap the button to load posts")
-                    )
+                    ContentUnavailableView("No Posts",
+                                           systemImage: "doc.text",
+                                           description: Text("Tap the button to load posts"))
                 } else {
                     List(posts) { post in
                         NavigationLink(destination: PostDetailView(post: post)) {

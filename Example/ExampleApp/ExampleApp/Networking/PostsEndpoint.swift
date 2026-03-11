@@ -16,12 +16,29 @@ struct PostsEndpoint: Endpoint {
     typealias Response = [Post]
 
     // swiftlint:disable:next force_unwrapping
-    var baseURL: URL { jsonPlaceholderBaseURL! }
-    var path: String { "posts" }
-    var method: HTTPMethod { .GET }
-    var headers: [String: String]? { nil }
-    var queryItems: [URLQueryItem]? { nil }
-    var body: Data? { nil }
+    var baseURL: URL {
+        jsonPlaceholderBaseURL!
+    }
+
+    var path: String {
+        "posts"
+    }
+
+    var method: HTTPMethod {
+        .GET
+    }
+
+    var headers: [String: String]? {
+        nil
+    }
+
+    var queryItems: [URLQueryItem]? {
+        nil
+    }
+
+    var body: Data? {
+        nil
+    }
 }
 
 /// Endpoint to fetch a single post by ID.
@@ -31,10 +48,27 @@ struct PostEndpoint: Endpoint {
     let postId: Int
 
     // swiftlint:disable:next force_unwrapping
-    var baseURL: URL { jsonPlaceholderBaseURL! }
-    var path: String { "posts/\(postId)" }
-    var method: HTTPMethod { .GET }
-    var headers: [String: String]? { nil }
-    var queryItems: [URLQueryItem]? { nil }
-    var body: Data? { nil }
+    var baseURL: URL {
+        jsonPlaceholderBaseURL!
+    }
+
+    var path: String {
+        "posts/\(postId)"
+    }
+
+    var method: HTTPMethod {
+        .GET
+    }
+
+    var headers: [String: String]? {
+        nil
+    }
+
+    var queryItems: [URLQueryItem]? {
+        nil
+    }
+
+    var body: Data? {
+        nil
+    }
 }

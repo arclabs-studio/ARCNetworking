@@ -34,7 +34,7 @@ public final class ARCNetworkService: ARCNetworkServiceProtocol {
 
     // MARK: Public Functions
 
-    public func request<T>(_ endpoint: T) async throws -> T.Response where T: Endpoint {
+    public func request<T: Endpoint>(_ endpoint: T) async throws -> T.Response {
         try await client.execute(endpoint)
     }
 }

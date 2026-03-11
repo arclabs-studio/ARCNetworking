@@ -12,7 +12,7 @@ class MockURLProtocol: URLProtocol {
     typealias Handler = (URLRequest) throws -> (URLResponse, Data)
 
     private static let lock = NSLock()
-    // Protected by lock - safe for concurrent access
+    /// Protected by lock - safe for concurrent access
     private nonisolated(unsafe) static var handlers: [String: Handler] = [:]
 
     static func register(_ handler: @escaping Handler, for host: String) {

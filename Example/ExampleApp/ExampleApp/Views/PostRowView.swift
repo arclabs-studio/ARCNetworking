@@ -25,12 +25,8 @@ struct PostRowView: View {
 }
 
 #Preview {
-    PostRowView(
-        post: Post(
-            id: 1,
-            userId: 1,
-            title: "Sample Post Title",
-            body: "This is the body of the sample post."
-        )
-    )
+    PostRowView(post: Post(id: 1,
+                           userId: 1,
+                           title: "Sample Post Title",
+                           body: "This is the body of the sample post."))
 }

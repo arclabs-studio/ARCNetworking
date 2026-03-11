@@ -39,13 +39,9 @@ struct PostDetailView: View {
 
 #Preview {
     NavigationStack {
-        PostDetailView(
-            post: Post(
-                id: 1,
-                userId: 1,
-                title: "Sample Post Title",
-                body: "This is the body of the sample post. It demonstrates how the detail view handles content."
-            )
-        )
+        PostDetailView(post: Post(id: 1,
+                                  userId: 1,
+                                  title: "Sample Post Title",
+                                  body: "This is the body of the sample post. It demonstrates how the detail view handles content."))
     }
 }
