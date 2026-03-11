@@ -34,6 +34,13 @@ public final class ARCNetworkService: ARCNetworkServiceProtocol {
 
     // MARK: Public Functions
 
+    /// Performs a network request for the given endpoint and returns the decoded response.
+    ///
+    /// Delegates execution to the underlying ``HTTPClientProtocol`` implementation.
+    ///
+    /// - Parameter endpoint: The endpoint describing the HTTP request.
+    /// - Returns: The decoded `T.Response`.
+    /// - Throws: Any ``HTTPError`` thrown by the underlying client.
     public func request<T: Endpoint>(_ endpoint: T) async throws -> T.Response {
         try await client.execute(endpoint)
     }

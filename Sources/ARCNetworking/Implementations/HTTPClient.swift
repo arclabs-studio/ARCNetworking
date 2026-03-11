@@ -115,6 +115,15 @@ public final class HTTPClient: HTTPClientProtocol {
         }
     }
 
+    /// Executes a request for the given endpoint and decodes the JSON response.
+    ///
+    /// Runs the request through the interceptor chain before hitting the network.
+    ///
+    /// - Parameter endpoint: The endpoint defining the request parameters and expected response type.
+    /// - Returns: The decoded response of type `T.Response`.
+    /// - Throws: ``HTTPError/invalidURL`` if the URL is malformed;
+    ///           ``HTTPError/requestFailed(_:)`` on non-2xx status codes;
+    ///           ``HTTPError/decodingFailed(_:)`` if the response cannot be decoded.
     public func execute<T: Endpoint>(_ endpoint: T) async throws -> T.Response {
         let request = try builder.buildRequest(from: endpoint)
         let (data, response) = try await chain(request)
