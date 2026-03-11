@@ -73,6 +73,6 @@ The `// TODO: Migrate to Swift unified HTTP client when available` comment in
 ## References
 
 - [apple/swift-http-types](https://github.com/apple/swift-http-types)
-- [SE-0451 — `swift-http-types` standard library pitch](https://forums.swift.org/t/pitch-stdlib-http-types/64629)
+- SE-0451 — `swift-http-types` standard library pitch (Swift Forums)
 - [WWDC 2023 — What's new in privacy](https://developer.apple.com/videos/play/wwdc2023/10053/) (HTTPTypesFoundation intro)
 - [Network.framework](https://developer.apple.com/documentation/network)

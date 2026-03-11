@@ -37,11 +37,11 @@ public struct AuthenticationInterceptor: RequestInterceptor {
 
     // MARK: RequestInterceptor
 
+    // swiftformat:disable wrapArguments
     /// Fetches the Bearer token from `tokenProvider` and injects it as the
     /// `Authorization` header before forwarding the request down the chain.
     ///
     /// - SeeAlso: ``RequestInterceptor/intercept(_:next:)``
-    // swiftformat:disable wrapArguments
     public func intercept(_ request: URLRequest,
                           next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse)) async throws
     -> (Data, HTTPURLResponse) {

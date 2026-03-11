@@ -43,11 +43,11 @@ public struct RetryInterceptor: RequestInterceptor {
 
     // MARK: RequestInterceptor
 
+    // swiftformat:disable wrapArguments
     /// Executes the request, retrying on HTTP 5xx with exponential backoff.
     /// Non-retryable responses (2xx, 3xx, 4xx) and transport errors are returned or thrown immediately.
     ///
     /// - SeeAlso: ``RequestInterceptor/intercept(_:next:)``
-    // swiftformat:disable wrapArguments
     public func intercept(_ request: URLRequest,
                           next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse)) async throws
     -> (Data, HTTPURLResponse) {

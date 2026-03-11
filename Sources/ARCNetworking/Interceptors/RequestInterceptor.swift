@@ -28,6 +28,7 @@ import Foundation
 /// }
 /// ```
 public protocol RequestInterceptor: Sendable {
+    // swiftformat:disable wrapArguments
     /// Intercepts an HTTP request before it is sent and/or the response before it is returned.
     ///
     /// - Parameters:
@@ -36,7 +37,6 @@ public protocol RequestInterceptor: Sendable {
     ///           or to the transport layer. Call this to continue the chain.
     /// - Returns: The raw `(Data, HTTPURLResponse)` tuple from the downstream handler.
     /// - Throws: Any error from this interceptor or from calling `next`.
-    // swiftformat:disable wrapArguments
     func intercept(_ request: URLRequest,
                    next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse)) async throws
         -> (Data, HTTPURLResponse)
