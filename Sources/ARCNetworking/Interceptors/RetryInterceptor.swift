@@ -52,7 +52,7 @@ public struct RetryInterceptor: RequestInterceptor {
                           next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse)) async throws
     -> (Data, HTTPURLResponse) {
         // swiftformat:enable wrapArguments
-        var lastError: Error?
+        var lastError: Error = HTTPError.unknown(NSError(domain: "RetryInterceptor", code: 0))
 
         for attempt in 0 ..< (maxRetries + 1) {
             if attempt > 0 {
@@ -72,6 +72,6 @@ public struct RetryInterceptor: RequestInterceptor {
             }
         }
 
-        throw lastError ?? HTTPError.unknown(NSError(domain: "RetryInterceptor", code: 0))
+        throw lastError
     }
 }
