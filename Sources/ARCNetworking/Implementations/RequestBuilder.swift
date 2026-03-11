@@ -23,6 +23,15 @@ public struct RequestBuilder: RequestBuilderProtocol {
 
     // MARK: Public Functions
 
+    /// Builds a `URLRequest` from the given endpoint.
+    ///
+    /// Resolves the full URL by appending `endpoint.path` to `endpoint.baseURL`,
+    /// applies query items, then sets headers via `HTTPTypes` if available,
+    /// or falls back to the legacy `[String: String]` headers path.
+    ///
+    /// - Parameter endpoint: The endpoint describing the request configuration.
+    /// - Returns: A fully configured `URLRequest`.
+    /// - Throws: ``HTTPError/invalidURL`` if the resolved URL is malformed.
     public func buildRequest(from endpoint: any Endpoint) throws -> URLRequest {
         guard var components = URLComponents(url: endpoint.baseURL.appendingPathComponent(endpoint.path),
                                              resolvingAgainstBaseURL: false) else {
@@ -41,9 +50,11 @@ public struct RequestBuilder: RequestBuilderProtocol {
 
         return buildRequestLegacy(url: url, endpoint: endpoint)
     }
+}
 
-    // MARK: Private Functions
+// MARK: - Private
 
+extension RequestBuilder {
     private func buildRequestUsingHTTPTypes(url: URL,
                                             endpoint: any Endpoint,
                                             fields: HTTPFields) -> URLRequest {

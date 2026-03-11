@@ -45,9 +45,11 @@ public final class LoggingInterceptor: RequestInterceptor, @unchecked Sendable {
 
         return (data, response)
     }
+}
 
-    // MARK: Private Functions
+// MARK: - Private
 
+extension LoggingInterceptor {
     private func logRequest(_ request: URLRequest) {
         let method = request.httpMethod ?? "UNKNOWN"
         let url = request.url?.absoluteString ?? "NO URL"
