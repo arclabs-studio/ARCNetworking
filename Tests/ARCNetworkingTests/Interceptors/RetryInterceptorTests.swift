@@ -9,12 +9,6 @@ import Foundation
 import Testing
 @testable import ARCNetworking
 
-// MARK: - Helpers
-
-private final class Counter: @unchecked Sendable {
-    var value = 0
-}
-
 // MARK: - Tests
 
 @Suite("RetryInterceptor", .serialized) struct RetryInterceptorTests {
@@ -22,7 +16,7 @@ private final class Counter: @unchecked Sendable {
     private let noSleep: @Sendable (Duration) async throws -> Void = { _ in }
 
     @Test("Does not retry on 2xx") func doesNotRetryOn2xx() async throws {
-        let counter = Counter()
+        let counter = Box(0)
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
             counter.value += 1
             // swiftlint:disable:next force_unwrapping
@@ -38,7 +32,7 @@ private final class Counter: @unchecked Sendable {
     }
 
     @Test("Does not retry on 4xx") func doesNotRetryOn4xx() async throws {
-        let counter = Counter()
+        let counter = Box(0)
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
             counter.value += 1
             // swiftlint:disable:next force_unwrapping
@@ -54,7 +48,7 @@ private final class Counter: @unchecked Sendable {
     }
 
     @Test("Retries up to maxRetries on 5xx then propagates error") func retriesUpToMaxRetriesOn5xx() async throws {
-        let counter = Counter()
+        let counter = Box(0)
         let maxRetries = 3
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
             counter.value += 1
@@ -84,7 +78,7 @@ private final class Counter: @unchecked Sendable {
 
     @Test("Returns success if transient 5xx resolves before maxRetries")
     func returnsSuccessIfTransient5xxResolvesBeforeMaxRetries() async throws {
-        let counter = Counter()
+        let counter = Box(0)
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
             counter.value += 1
             let statusCode = counter.value < 3 ? 503 : 200

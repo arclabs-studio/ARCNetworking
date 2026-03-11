@@ -9,15 +9,6 @@ import Foundation
 import Testing
 @testable import ARCNetworking
 
-// MARK: - Helpers
-
-private final class Box<T>: @unchecked Sendable {
-    var value: T
-    init(_ value: T) {
-        self.value = value
-    }
-}
-
 // MARK: - Tests
 
 @Suite("LoggingInterceptor") struct LoggingInterceptorTests {
