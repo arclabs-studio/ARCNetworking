@@ -24,9 +24,7 @@ public protocol HTTPClientProtocol: Sendable {
     ///      Note: URLError from transport must be wrapped in HTTPError.unknown before landing.
     ///      Affected test: HTTPClientTests.executePropagatesTransportError -->
     func execute<T: Endpoint>(_ endpoint: T) async throws -> T.Response
-}
 
-extension HTTPClientProtocol {
     /// Streams an HTTP response as an `AsyncThrowingStream` of `Data` chunks.
     ///
     /// Suitable for SSE (Server-Sent Events) or any line-delimited streaming response.
@@ -34,10 +32,12 @@ extension HTTPClientProtocol {
     ///
     /// - Parameter endpoint: The endpoint defining the request parameters.
     /// - Returns: An `AsyncThrowingStream` delivering response data line by line.
-    ///
-    /// - Note: This default implementation throws `HTTPError.unknown`. Override in
-    ///   concrete types (e.g. `HTTPClient`) to provide real streaming behaviour.
-    ///   Existing conformers (`MockHTTPClient`, etc.) do not need to implement this method.
+    func stream(_ endpoint: some Endpoint) -> AsyncThrowingStream<Data, Error>
+}
+
+extension HTTPClientProtocol {
+    /// Default implementation — existing conformers (`MockHTTPClient`, etc.)
+    /// get this for free; no changes required in test files.
     public func stream(_: some Endpoint) -> AsyncThrowingStream<Data, Error> {
         AsyncThrowingStream { continuation in
             let error = NSError(domain: "HTTPClientProtocol",
