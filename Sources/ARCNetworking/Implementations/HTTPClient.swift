@@ -89,7 +89,7 @@ public final class HTTPClient: HTTPClientProtocol {
         // Build the request synchronously so endpoint is not captured across concurrency boundaries.
         let requestResult = Result { try builder.buildRequest(from: endpoint) }
         return AsyncThrowingStream { continuation in
-            Task { [session] in
+            let task = Task { [session] in
                 do {
                     let request = try requestResult.get()
                     let (bytes, response) = try await session.bytes(for: request)
@@ -105,6 +105,10 @@ public final class HTTPClient: HTTPClientProtocol {
                     }
 
                     for try await line in bytes.lines {
+                        guard !Task.isCancelled else {
+                            continuation.finish(throwing: CancellationError())
+                            return
+                        }
                         continuation.yield(Data(line.utf8))
                     }
                     continuation.finish()
@@ -112,6 +116,8 @@ public final class HTTPClient: HTTPClientProtocol {
                     continuation.finish(throwing: error)
                 }
             }
+            // Cancel the streaming Task when the consumer drops the AsyncThrowingStream.
+            continuation.onTermination = { _ in task.cancel() }
         }
     }
 
