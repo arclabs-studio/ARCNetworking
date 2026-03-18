@@ -64,7 +64,7 @@ import Testing
             _ = try await sut.intercept(request, next: next)
             Issue.record("Expected HTTPError.requestFailed to be thrown")
         } catch let error as HTTPError {
-            if case let .requestFailed(code) = error {
+            if case let .requestFailed(code, _) = error {
                 #expect(code == 503)
                 // Initial attempt + maxRetries retries
                 #expect(counter.value == maxRetries + 1)

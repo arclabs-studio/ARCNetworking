@@ -17,7 +17,7 @@ import Testing
     }
 
     @Test("Description for requestFailed includes status code") func requestFailedDescription() {
-        let error = HTTPError.requestFailed(422)
+        let error = HTTPError.requestFailed(statusCode: 422, data: Data())
         let description = error.localizedDescription
         #expect(description.contains("422"))
     }
