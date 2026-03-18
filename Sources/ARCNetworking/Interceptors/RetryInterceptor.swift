@@ -64,7 +64,7 @@ public struct RetryInterceptor: RequestInterceptor {
             let (data, response) = try await next(request)
 
             if response.statusCode >= 500 {
-                lastError = HTTPError.requestFailed(response.statusCode)
+                lastError = HTTPError.requestFailed(statusCode: response.statusCode, data: data)
                 if attempt < maxRetries { continue }
             } else {
                 // 2xx, 3xx, 4xx — return immediately without retry.
