@@ -81,8 +81,36 @@ private struct MockHTTPClientEndpoint: Endpoint {
             _ = try await sut.execute(endpoint)
             Issue.record("Expected HTTPError.requestFailed")
         } catch let error as HTTPError {
-            if case let .requestFailed(statusCode) = error {
+            if case let .requestFailed(statusCode, _) = error {
                 #expect(statusCode == 404)
+            } else {
+                Issue.record("Unexpected error: \(error)")
+            }
+        } catch {
+            Issue.record("Unexpected error of different type: \(error)")
+        }
+    }
+
+    @Test("requestFailed.data contains the response body on non-2xx")
+    func executeRequestFailedDataContainsResponseBody() async throws {
+        defer { unregisterHandler() }
+        let expectedBody = Data("{\"error\":\"not_found\"}".utf8)
+        registerHandler { request in
+            // swiftlint:disable:next force_unwrapping
+            let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
+            return (response, expectedBody)
+        }
+
+        let endpoint = MockHTTPClientEndpoint()
+        let sut = makeSUT()
+
+        do {
+            _ = try await sut.execute(endpoint)
+            Issue.record("Expected HTTPError.requestFailed")
+        } catch let error as HTTPError {
+            if case let .requestFailed(statusCode, data) = error {
+                #expect(statusCode == 404)
+                #expect(data == expectedBody)
             } else {
                 Issue.record("Unexpected error: \(error)")
             }

@@ -100,7 +100,8 @@ public final class HTTPClient: HTTPClientProtocol {
                     }
 
                     guard HTTPStatusCode.successRange.contains(http.statusCode) else {
-                        continuation.finish(throwing: HTTPError.requestFailed(http.statusCode))
+                        continuation.finish(throwing: HTTPError.requestFailed(statusCode: http.statusCode,
+                                                                              data: Data()))
                         return
                     }
 
@@ -128,14 +129,14 @@ public final class HTTPClient: HTTPClientProtocol {
     /// - Parameter endpoint: The endpoint defining the request parameters and expected response type.
     /// - Returns: The decoded response of type `T.Response`.
     /// - Throws: ``HTTPError/invalidURL`` if the URL is malformed;
-    ///           ``HTTPError/requestFailed(_:)`` on non-2xx status codes;
+    ///           ``HTTPError/requestFailed(statusCode:data:)`` on non-2xx status codes;
     ///           ``HTTPError/decodingFailed(_:)`` if the response cannot be decoded.
     public func execute<T: Endpoint>(_ endpoint: T) async throws -> T.Response {
         let request = try builder.buildRequest(from: endpoint)
         let (data, response) = try await chain(request)
 
         guard HTTPStatusCode.successRange.contains(response.statusCode) else {
-            throw HTTPError.requestFailed(response.statusCode)
+            throw HTTPError.requestFailed(statusCode: response.statusCode, data: data)
         }
 
         do {

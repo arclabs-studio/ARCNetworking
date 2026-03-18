@@ -99,7 +99,7 @@ private struct HeaderMutatingInterceptor: RequestInterceptor {
 
         let log = SharedLog()
         let spy = SpyInterceptor(name: "before", sharedLog: log)
-        let throwing = ThrowingInterceptor(error: HTTPError.requestFailed(503))
+        let throwing = ThrowingInterceptor(error: HTTPError.requestFailed(statusCode: 503, data: Data()))
         let afterSpy = SpyInterceptor(name: "after", sharedLog: log)
 
         let sut = makeSUT(interceptors: [spy, throwing, afterSpy])
@@ -108,7 +108,7 @@ private struct HeaderMutatingInterceptor: RequestInterceptor {
             _ = try await sut.execute(MockChainEndpoint())
             Issue.record("Expected an error to be thrown")
         } catch let error as HTTPError {
-            if case .requestFailed(503) = error {
+            if case .requestFailed(statusCode: 503, data: _) = error {
                 #expect(log.all == ["before"])
             } else {
                 Issue.record("Unexpected error: \(error)")

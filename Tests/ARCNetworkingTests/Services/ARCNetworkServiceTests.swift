@@ -107,7 +107,7 @@ private final class MockHTTPClient: HTTPClientProtocol, @unchecked Sendable {
 
     @Test("Propagates HTTPError instances thrown by the client") func requestPropagatesHTTPError() async {
         let endpoint = MockServiceEndpoint()
-        let expectedError = HTTPError.requestFailed(500)
+        let expectedError = HTTPError.requestFailed(statusCode: 500, data: Data())
 
         let mockClient = MockHTTPClient()
         mockClient.executeClosure = { _ in
@@ -120,7 +120,7 @@ private final class MockHTTPClient: HTTPClientProtocol, @unchecked Sendable {
             _ = try await service.request(endpoint)
             Issue.record("Expected the call to rethrow HTTPError.requestFailed")
         } catch let error as HTTPError {
-            if case let .requestFailed(code) = error {
+            if case let .requestFailed(code, _) = error {
                 #expect(code == 500)
             } else {
                 Issue.record("Unexpected error: \(error)")

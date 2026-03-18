@@ -118,7 +118,7 @@ private class SuspendingURLProtocol: URLProtocol {
             for try await _ in sut.stream(MockStreamEndpoint()) {}
             Issue.record("Expected HTTPError.requestFailed")
         } catch let error as HTTPError {
-            if case let .requestFailed(code) = error {
+            if case let .requestFailed(code, _) = error {
                 #expect(code == 503)
             } else {
                 Issue.record("Unexpected HTTPError: \(error)")
