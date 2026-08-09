@@ -5,12 +5,6 @@
     },
     {
       "pattern": "^http://127.0.0.1"
-    },
-    {
-      "pattern": "^https://github.com/arclabs-studio/"
-    },
-    {
-      "pattern": "^https://img.shields.io/"
     }
   ],
   "replacementPatterns": [
