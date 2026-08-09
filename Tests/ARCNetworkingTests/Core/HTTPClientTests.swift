@@ -20,7 +20,6 @@ private struct MockHTTPClientEndpoint: Endpoint {
     typealias Response = HTTPClientResponseModel
 
     var baseURL: URL {
-        // swiftlint:disable:next force_unwrapping
         URL(string: "https://client-tests.arcnetworking")!
     }
 

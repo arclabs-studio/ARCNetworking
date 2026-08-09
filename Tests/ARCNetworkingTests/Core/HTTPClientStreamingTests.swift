@@ -19,7 +19,6 @@ private struct MockStreamEndpoint: Endpoint {
     typealias Response = StreamResponseModel
 
     var baseURL: URL {
-        // swiftlint:disable:next force_unwrapping
         URL(string: "https://stream-tests.arcnetworking")!
     }
 
