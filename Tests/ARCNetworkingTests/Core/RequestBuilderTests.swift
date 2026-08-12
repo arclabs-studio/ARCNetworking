@@ -20,7 +20,6 @@ private struct MockRequestBuilderEndpoint: Endpoint {
     typealias Response = RequestBuilderPayload
 
     var baseURL: URL {
-        // swiftlint:disable:next force_unwrapping
         URL(string: "https://example.com")!
     }
 
@@ -49,7 +48,6 @@ private struct HTTPTypesEndpoint: Endpoint {
     typealias Response = [String: String]
 
     var baseURL: URL {
-        // swiftlint:disable:next force_unwrapping
         URL(string: "https://example.com")!
     }
 
@@ -86,7 +84,6 @@ private struct BodylessEndpoint: Endpoint {
     typealias Response = [String: String]
 
     var baseURL: URL {
-        // swiftlint:disable:next force_unwrapping
         URL(string: "https://example.com")!
     }
 

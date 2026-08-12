@@ -20,7 +20,6 @@ private struct MockServiceEndpoint: Endpoint {
     typealias Response = ServiceResponseModel
 
     var baseURL: URL {
-        // swiftlint:disable:next force_unwrapping
         URL(string: "https://service-tests.arcnetworking")!
     }
 

@@ -172,7 +172,6 @@ private struct MockChainEndpoint: Endpoint {
     typealias Response = MockChainResponse
 
     var baseURL: URL {
-        // swiftlint:disable:next force_unwrapping
         URL(string: "https://chain-tests.arcnetworking")!
     }
 
