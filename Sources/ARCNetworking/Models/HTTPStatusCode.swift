@@ -24,6 +24,7 @@ public enum HTTPStatusCode {
     public static let notFound = 404
     public static let conflict = 409
     public static let unprocessableEntity = 422
+    public static let tooManyRequests = 429
 
     public static let internalServerError = 500
     public static let badGateway = 502

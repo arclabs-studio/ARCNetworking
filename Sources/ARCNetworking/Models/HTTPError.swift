@@ -12,7 +12,7 @@ public enum HTTPError: Error, LocalizedError, @unchecked Sendable {
     /// The URL provided was invalid or malformed.
     case invalidURL
     /// The HTTP request failed with a non-2xx status code.
-    case requestFailed(Int)
+    case requestFailed(statusCode: Int, data: Data)
     /// The response data could not be decoded to the expected type.
     case decodingFailed(Error)
     /// An unknown error occurred during the network operation.
@@ -22,7 +22,7 @@ public enum HTTPError: Error, LocalizedError, @unchecked Sendable {
         switch self {
         case .invalidURL:
             "The URL provided was invalid."
-        case let .requestFailed(code):
+        case let .requestFailed(code, _):
             "The request failed with status code \(code)."
         case let .decodingFailed(error):
             "Failed to decode response: \(error.localizedDescription)"

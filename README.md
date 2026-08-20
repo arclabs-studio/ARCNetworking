@@ -5,7 +5,7 @@ Designed for scalability, reusability, and clean architecture across Apple platf
 
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg)
 ![Platform](https://img.shields.io/badge/platforms-iOS%2017%2B%20%7C%20macOS%2014%2B%20%7C%20tvOS%2017%2B%20%7C%20watchOS%2010%2B-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)
+![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-orange.svg)
 ![Xcode](https://img.shields.io/badge/Xcode-16%2B-blue.svg)
 
 ---
@@ -226,7 +226,13 @@ Please ensure your code passes SwiftLint and all tests before submitting.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**PolyForm Noncommercial License 1.0.0** © 2025–2026 ARC Labs Studio.
+
+Source-available. Free for non-commercial use (research, study, hobby, evaluation). **Commercial use requires a separate license** — contact `arclabs.studio@gmail.com`.
+
+ARC Labs Studio's own commercial products are covered by an internal use grant — see [INTERNAL-USE.md](INTERNAL-USE.md).
+
+See [LICENSE](LICENSE) for the full license text.
 
 ---
 
