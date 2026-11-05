@@ -10,7 +10,7 @@ import Foundation
 import HTTPTypes
 
 /// Base URL for JSONPlaceholder API.
-private let jsonPlaceholderBaseURL = URL(string: "https://jsonplaceholder.typicode.com")
+private let jsonPlaceholderBaseURL = URL.demoBase("https://jsonplaceholder.typicode.com")
 
 // MARK: - Posts Endpoints
 
@@ -23,8 +23,7 @@ struct PostsEndpoint: Endpoint {
     typealias Response = [Post]
 
     var baseURL: URL {
-        // swiftlint:disable:next force_unwrapping
-        jsonPlaceholderBaseURL!
+        jsonPlaceholderBaseURL
     }
 
     var path: String {
@@ -62,8 +61,7 @@ struct PostEndpoint: Endpoint {
     let postId: Int
 
     var baseURL: URL {
-        // swiftlint:disable:next force_unwrapping
-        jsonPlaceholderBaseURL!
+        jsonPlaceholderBaseURL
     }
 
     var path: String {
@@ -100,7 +98,7 @@ struct StreamLinesEndpoint: Endpoint {
     let count: Int
 
     var baseURL: URL {
-        URL(string: "https://httpbin.org")!
+        URL.demoBase("https://httpbin.org")
     }
 
     var path: String {
@@ -121,5 +119,17 @@ struct StreamLinesEndpoint: Endpoint {
 
     var body: Data? {
         nil
+    }
+}
+
+// MARK: - Demo Base URLs
+
+extension URL {
+    /// Parses a hard-coded demo base URL. A literal that does not parse is a programmer error.
+    fileprivate static func demoBase(_ string: String) -> URL {
+        guard let url = URL(string: string) else {
+            preconditionFailure("Invalid demo base URL literal: \(string)")
+        }
+        return url
     }
 }
