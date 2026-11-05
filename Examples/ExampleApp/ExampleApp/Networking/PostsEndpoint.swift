@@ -100,7 +100,6 @@ struct StreamLinesEndpoint: Endpoint {
     let count: Int
 
     var baseURL: URL {
-        // swiftlint:disable:next force_unwrapping
         URL(string: "https://httpbin.org")!
     }
 
