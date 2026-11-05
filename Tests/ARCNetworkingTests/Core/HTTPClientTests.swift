@@ -20,7 +20,7 @@ private struct MockHTTPClientEndpoint: Endpoint {
     typealias Response = HTTPClientResponseModel
 
     var baseURL: URL {
-        URL(string: "https://client-tests.arcnetworking")!
+        URL.fixture("https://client-tests.arcnetworking")
     }
 
     var path: String {
@@ -52,8 +52,7 @@ private struct MockHTTPClientEndpoint: Endpoint {
         let expectedModel = HTTPClientResponseModel(id: 42, title: "ARC Networking Rocks")
         registerHandler { request in
             #expect(request.url?.absoluteString == "https://client-tests.arcnetworking/articles/42")
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 200)
             let data = try JSONEncoder().encode(expectedModel)
             return (response, data)
         }
@@ -68,8 +67,7 @@ private struct MockHTTPClientEndpoint: Endpoint {
     @Test("Propagates errors for non-2xx status codes") func executeThrowsForHTTPError() async {
         defer { unregisterHandler() }
         registerHandler { request in
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
+            let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 404)
             return (response, Data())
         }
 
@@ -95,8 +93,7 @@ private struct MockHTTPClientEndpoint: Endpoint {
         defer { unregisterHandler() }
         let expectedBody = Data("{\"error\":\"not_found\"}".utf8)
         registerHandler { request in
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
+            let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 404)
             return (response, expectedBody)
         }
 
@@ -121,8 +118,7 @@ private struct MockHTTPClientEndpoint: Endpoint {
     @Test("Throws HTTPError.decodingFailed when decoding fails") func executeThrowsForDecodingError() async {
         defer { unregisterHandler() }
         registerHandler { request in
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 200)
             let invalidJSON = Data("{\"unexpected\":true}".utf8)
             return (response, invalidJSON)
         }
@@ -148,11 +144,11 @@ private struct MockHTTPClientEndpoint: Endpoint {
     func executeThrowsUnknownForNonHTTPResponse() async {
         defer { unregisterHandler() }
         registerHandler { request in
-            let response = URLResponse(// swiftlint:disable:next force_unwrapping
-                url: request.url!,
-                mimeType: nil,
-                expectedContentLength: 0,
-                textEncodingName: nil)
+            guard let url = request.url else { throw URLError(.badURL) }
+            let response = URLResponse(url: url,
+                                       mimeType: nil,
+                                       expectedContentLength: 0,
+                                       textEncodingName: nil)
             return (response, Data())
         }
 

@@ -16,7 +16,7 @@ import Testing
         let capturedRequest = Box<URLRequest?>(nil)
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
             capturedRequest.value = req
-            return makeOKResponse(for: req)
+            return try makeOKResponse(for: req)
         }
 
         let sut = AuthenticationInterceptor { "test-token-abc" }
@@ -31,7 +31,7 @@ import Testing
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
             nextCalled.value = true
             Issue.record("next should not be called when tokenProvider throws")
-            return makeOKResponse(for: req)
+            return try makeOKResponse(for: req)
         }
 
         let sut = AuthenticationInterceptor { throw HTTPError.unknown(NSError(domain: "Auth", code: 401)) }
@@ -55,7 +55,7 @@ import Testing
         let capturedRequest = Box<URLRequest?>(nil)
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
             capturedRequest.value = req
-            return makeOKResponse(for: req)
+            return try makeOKResponse(for: req)
         }
 
         let sut = AuthenticationInterceptor { "new-token" }
@@ -70,8 +70,7 @@ import Testing
 
 // MARK: - Private Helpers
 
-private func makeOKResponse(for request: URLRequest) -> (Data, HTTPURLResponse) {
-    // swiftlint:disable:next force_unwrapping
-    let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+private func makeOKResponse(for request: URLRequest) throws -> (Data, HTTPURLResponse) {
+    let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 200)
     return (Data(), response)
 }

@@ -6,25 +6,24 @@
 //
 
 import Foundation
+import os
 
 /// Intercepts URLSession requests during tests to provide deterministic responses.
 class MockURLProtocol: URLProtocol {
-    typealias Handler = (URLRequest) throws -> (URLResponse, Data)
+    typealias Handler = @Sendable (URLRequest) throws -> (URLResponse, Data)
 
-    private static let lock = NSLock()
-    /// Protected by lock - safe for concurrent access
-    private nonisolated(unsafe) static var handlers: [String: Handler] = [:]
+    private static let handlers = OSAllocatedUnfairLock<[String: Handler]>(initialState: [:])
 
     static func register(_ handler: @escaping Handler, for host: String) {
-        lock.withLock { handlers[host] = handler }
+        handlers.withLock { $0[host] = handler }
     }
 
     static func unregister(host: String) {
-        lock.withLock { _ = handlers.removeValue(forKey: host) }
+        handlers.withLock { _ = $0.removeValue(forKey: host) }
     }
 
     private static func handler(for host: String) -> Handler? {
-        lock.withLock { handlers[host] }
+        handlers.withLock { $0[host] }
     }
 
     override class func canInit(with _: URLRequest) -> Bool {

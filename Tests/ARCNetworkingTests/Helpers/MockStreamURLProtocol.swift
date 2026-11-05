@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 
 /// Intercepts URLSession streaming requests during tests, delivering bytes in configurable chunks.
 ///
@@ -13,21 +14,20 @@ import Foundation
 /// The handler returns `(HTTPURLResponse, [Data])` where each `Data` element is delivered
 /// as a separate chunk, simulating incremental streaming (e.g., SSE).
 class MockStreamURLProtocol: URLProtocol {
-    typealias StreamHandler = (URLRequest) throws -> (URLResponse, [Data])
+    typealias StreamHandler = @Sendable (URLRequest) throws -> (URLResponse, [Data])
 
-    private static let lock = NSLock()
-    private nonisolated(unsafe) static var handlers: [String: StreamHandler] = [:]
+    private static let handlers = OSAllocatedUnfairLock<[String: StreamHandler]>(initialState: [:])
 
     static func register(_ handler: @escaping StreamHandler, for host: String) {
-        lock.withLock { handlers[host] = handler }
+        handlers.withLock { $0[host] = handler }
     }
 
     static func unregister(host: String) {
-        lock.withLock { _ = handlers.removeValue(forKey: host) }
+        handlers.withLock { _ = $0.removeValue(forKey: host) }
     }
 
     private static func handler(for host: String) -> StreamHandler? {
-        lock.withLock { handlers[host] }
+        handlers.withLock { $0[host] }
     }
 
     override class func canInit(with _: URLRequest) -> Bool {
