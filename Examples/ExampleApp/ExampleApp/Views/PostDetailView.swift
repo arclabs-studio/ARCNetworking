@@ -42,6 +42,7 @@ struct PostDetailView: View {
         PostDetailView(post: Post(id: 1,
                                   userId: 1,
                                   title: "Sample Post Title",
-                                  body: "This is the body of the sample post. It demonstrates how the detail view handles content."))
+                                  body: "This is the body of the sample post. "
+                                      + "It demonstrates how the detail view handles content."))
     }
 }
