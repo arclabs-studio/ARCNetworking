@@ -8,7 +8,7 @@
 import Foundation
 
 /// Errors that can occur during HTTP network operations.
-public enum HTTPError: Error, LocalizedError, @unchecked Sendable {
+public enum HTTPError: Error, LocalizedError {
     /// The URL provided was invalid or malformed.
     case invalidURL
     /// The HTTP request failed with a non-2xx status code.

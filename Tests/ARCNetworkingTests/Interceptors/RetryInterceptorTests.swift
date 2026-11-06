@@ -18,9 +18,8 @@ import Testing
     @Test("Does not retry on 2xx") func doesNotRetryOn2xx() async throws {
         let counter = Box(0)
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
-            counter.value += 1
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: req.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            counter.update { $0 += 1 }
+            let response = try HTTPURLResponse.fixture(url: req.url, statusCode: 200)
             return (Data(), response)
         }
 
@@ -34,9 +33,8 @@ import Testing
     @Test("Does not retry on 4xx") func doesNotRetryOn4xx() async throws {
         let counter = Box(0)
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
-            counter.value += 1
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: req.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
+            counter.update { $0 += 1 }
+            let response = try HTTPURLResponse.fixture(url: req.url, statusCode: 404)
             return (Data(), response)
         }
 
@@ -51,9 +49,8 @@ import Testing
         let counter = Box(0)
         let maxRetries = 3
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
-            counter.value += 1
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: req.url!, statusCode: 503, httpVersion: nil, headerFields: nil)!
+            counter.update { $0 += 1 }
+            let response = try HTTPURLResponse.fixture(url: req.url, statusCode: 503)
             return (Data(), response)
         }
 
@@ -80,10 +77,9 @@ import Testing
     func returnsSuccessIfTransient5xxResolvesBeforeMaxRetries() async throws {
         let counter = Box(0)
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
-            counter.value += 1
+            counter.update { $0 += 1 }
             let statusCode = counter.value < 3 ? 503 : 200
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: req.url!, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
+            let response = try HTTPURLResponse.fixture(url: req.url, statusCode: statusCode)
             return (Data(), response)
         }
 

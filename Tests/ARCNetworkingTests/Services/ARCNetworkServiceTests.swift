@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 import Testing
 @testable import ARCNetworking
 
@@ -20,7 +21,7 @@ private struct MockServiceEndpoint: Endpoint {
     typealias Response = ServiceResponseModel
 
     var baseURL: URL {
-        URL(string: "https://service-tests.arcnetworking")!
+        URL.fixture("https://service-tests.arcnetworking")
     }
 
     var path: String {
@@ -44,15 +45,38 @@ private struct MockServiceEndpoint: Endpoint {
     }
 }
 
-/// Mock client for testing - @unchecked Sendable since access is controlled in test context
-private final class MockHTTPClient: HTTPClientProtocol, @unchecked Sendable {
-    var callCount = 0
-    var receivedPaths: [String] = []
-    var executeClosure: ((Any) async throws -> Any)?
+/// Mock client for testing. Its state lives behind a lock, so it is checked Sendable.
+private final class MockHTTPClient: HTTPClientProtocol {
+    private struct State {
+        var callCount: Int = 0
+        var receivedPaths: [String] = []
+        var executeClosure: (@Sendable (Any) async throws -> Any)?
+    }
+
+    private let state = OSAllocatedUnfairLock(initialState: State())
+
+    var callCount: Int {
+        get { state.withLock { $0.callCount } }
+        set { state.withLock { $0.callCount = newValue } }
+    }
+
+    var receivedPaths: [String] {
+        get { state.withLock { $0.receivedPaths } }
+        set { state.withLock { $0.receivedPaths = newValue } }
+    }
+
+    var executeClosure: (@Sendable (Any) async throws -> Any)? {
+        get { state.withLock { $0.executeClosure } }
+        set { state.withLock { $0.executeClosure = newValue } }
+    }
 
     func execute<T: Endpoint>(_ endpoint: T) async throws -> T.Response {
-        callCount += 1
-        receivedPaths.append(endpoint.path)
+        let path = endpoint.path
+        let executeClosure = state.withLock { state in
+            state.callCount += 1
+            state.receivedPaths.append(path)
+            return state.executeClosure
+        }
         guard let executeClosure else {
             Issue.record("MockHTTPClient response was not stubbed")
             throw HTTPError.unknown(URLError(.badServerResponse))
@@ -92,8 +116,7 @@ private final class MockHTTPClient: HTTPClientProtocol, @unchecked Sendable {
         let expectedResponse = ServiceResponseModel(code: 201, message: "created")
 
         registerHandler { request in
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 200)
             let data = try JSONEncoder().encode(expectedResponse)
             return (response, data)
         }

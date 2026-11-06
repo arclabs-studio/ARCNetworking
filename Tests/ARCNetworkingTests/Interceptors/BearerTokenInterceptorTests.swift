@@ -16,7 +16,7 @@ import Testing
         let capturedRequest = Box<URLRequest?>(nil)
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
             capturedRequest.value = req
-            return makeBearerOKResponse(for: req)
+            return try makeBearerOKResponse(for: req)
         }
 
         let sut = BearerTokenInterceptor { "sync-token-xyz" }
@@ -31,7 +31,7 @@ import Testing
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
             nextCalled.value = true
             Issue.record("next should not be called when tokenProvider throws")
-            return makeBearerOKResponse(for: req)
+            return try makeBearerOKResponse(for: req)
         }
 
         struct TokenError: Error {}
@@ -52,7 +52,7 @@ import Testing
         let capturedRequest = Box<URLRequest?>(nil)
         let next: @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse) = { req in
             capturedRequest.value = req
-            return makeBearerOKResponse(for: req)
+            return try makeBearerOKResponse(for: req)
         }
 
         let sut = BearerTokenInterceptor { "new-sync-token" }
@@ -67,8 +67,7 @@ import Testing
 
 // MARK: - Private Helpers
 
-private func makeBearerOKResponse(for request: URLRequest) -> (Data, HTTPURLResponse) {
-    // swiftlint:disable:next force_unwrapping
-    let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+private func makeBearerOKResponse(for request: URLRequest) throws -> (Data, HTTPURLResponse) {
+    let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 200)
     return (Data(), response)
 }

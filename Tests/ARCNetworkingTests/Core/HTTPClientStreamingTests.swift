@@ -19,7 +19,7 @@ private struct MockStreamEndpoint: Endpoint {
     typealias Response = StreamResponseModel
 
     var baseURL: URL {
-        URL(string: "https://stream-tests.arcnetworking")!
+        URL.fixture("https://stream-tests.arcnetworking")
     }
 
     var path: String {
@@ -57,9 +57,9 @@ private class SuspendingURLProtocol: URLProtocol {
     }
 
     override func startLoading() {
-        guard let url = request.url else { return }
-        // swiftlint:disable:next force_unwrapping
-        let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
+        guard let url = request.url,
+              let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
+        else { return }
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         // Intentionally omit urlProtocolDidFinishLoading to simulate an open, streaming connection.
     }
@@ -106,8 +106,7 @@ private class SuspendingURLProtocol: URLProtocol {
         defer { unregisterHandler() }
 
         MockStreamURLProtocol.register({ request in
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: request.url!, statusCode: 503, httpVersion: nil, headerFields: nil)!
+            let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 503)
             return (response, [])
         }, for: "stream-tests.arcnetworking")
 
@@ -171,8 +170,7 @@ extension HTTPClientStreamingTests {
 
     private func registerLinesHandler(_ lines: [String]) {
         MockStreamURLProtocol.register({ request in
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 200)
             // Join lines with newline delimiters; bytes.lines splits on \n.
             let body = Data((lines.joined(separator: "\n") + "\n").utf8)
             return (response, [body])
