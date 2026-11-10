@@ -12,7 +12,7 @@ import Foundation
 ///
 /// Logging is gated by `#if DEBUG` to avoid leaking sensitive data in production builds.
 /// `HTTPClient` uses this as the default interceptor to preserve v1.0 logging behaviour.
-public final class LoggingInterceptor: RequestInterceptor, @unchecked Sendable {
+public final class LoggingInterceptor: RequestInterceptor {
     // MARK: Private Properties
 
     private let logger = ARCLogger(subsystem: "com.arclabs-studio.arcnetworking", category: "HTTP")

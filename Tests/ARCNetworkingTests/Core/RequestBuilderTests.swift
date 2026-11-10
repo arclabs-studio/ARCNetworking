@@ -20,7 +20,7 @@ private struct MockRequestBuilderEndpoint: Endpoint {
     typealias Response = RequestBuilderPayload
 
     var baseURL: URL {
-        URL(string: "https://example.com")!
+        URL.fixture("https://example.com")
     }
 
     var path: String {
@@ -48,7 +48,7 @@ private struct HTTPTypesEndpoint: Endpoint {
     typealias Response = [String: String]
 
     var baseURL: URL {
-        URL(string: "https://example.com")!
+        URL.fixture("https://example.com")
     }
 
     var path: String {
@@ -74,8 +74,9 @@ private struct HTTPTypesEndpoint: Endpoint {
     var httpFields: HTTPFields? {
         var fields = HTTPFields()
         fields[.accept] = "application/json"
-        // swiftlint:disable:next force_unwrapping
-        fields[.init("X-ARC-Client")!] = "ARCNetworking"
+        if let clientField = HTTPField.Name("X-ARC-Client") {
+            fields[clientField] = "ARCNetworking"
+        }
         return fields
     }
 }
@@ -84,7 +85,7 @@ private struct BodylessEndpoint: Endpoint {
     typealias Response = [String: String]
 
     var baseURL: URL {
-        URL(string: "https://example.com")!
+        URL.fixture("https://example.com")
     }
 
     var path: String {

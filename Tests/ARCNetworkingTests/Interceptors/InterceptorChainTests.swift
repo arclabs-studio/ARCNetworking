@@ -6,14 +6,14 @@
 //
 
 import Foundation
+import os
 import Testing
 @testable import ARCNetworking
 
 // MARK: - Spy Interceptor
 
-private final class SpyInterceptor: RequestInterceptor, @unchecked Sendable {
+private final class SpyInterceptor: RequestInterceptor {
     let name: String
-    private(set) var callOrder: [String] = []
     private let sharedLog: SharedLog
 
     init(name: String, sharedLog: SharedLog) {
@@ -31,16 +31,15 @@ private final class SpyInterceptor: RequestInterceptor, @unchecked Sendable {
     }
 }
 
-private final class SharedLog: @unchecked Sendable {
-    private var entries: [String] = []
-    private let lock = NSLock()
+private final class SharedLog: Sendable {
+    private let entries = OSAllocatedUnfairLock<[String]>(initialState: [])
 
     func append(_ name: String) {
-        lock.withLock { entries.append(name) }
+        entries.withLock { $0.append(name) }
     }
 
     var all: [String] {
-        lock.withLock { entries }
+        entries.withLock { $0 }
     }
 }
 
@@ -121,11 +120,10 @@ private struct HeaderMutatingInterceptor: RequestInterceptor {
     @Test("Interceptor can mutate request before forwarding") func interceptorCanMutateRequest() async throws {
         defer { unregisterHandler() }
 
-        var receivedHeader: String?
+        let receivedHeader = Box<String?>(nil)
         MockURLProtocol.register({ request in
-            receivedHeader = request.value(forHTTPHeaderField: "X-Mutated")
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            receivedHeader.value = request.value(forHTTPHeaderField: "X-Mutated")
+            let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 200)
             let data = try JSONEncoder().encode(MockChainResponse(status: "ok"))
             return (response, data)
         }, for: "chain-tests.arcnetworking")
@@ -134,7 +132,7 @@ private struct HeaderMutatingInterceptor: RequestInterceptor {
         let sut = makeSUT(interceptors: [mutator])
         _ = try await sut.execute(MockChainEndpoint())
 
-        #expect(receivedHeader == "yes")
+        #expect(receivedHeader.value == "yes")
     }
 }
 
@@ -150,8 +148,7 @@ extension InterceptorChainTests {
 
     private func registerSuccessHandler() {
         MockURLProtocol.register({ request in
-            // swiftlint:disable:next force_unwrapping
-            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let response = try HTTPURLResponse.fixture(url: request.url, statusCode: 200)
             let data = try JSONEncoder().encode(MockChainResponse(status: "ok"))
             return (response, data)
         }, for: "chain-tests.arcnetworking")
@@ -172,7 +169,7 @@ private struct MockChainEndpoint: Endpoint {
     typealias Response = MockChainResponse
 
     var baseURL: URL {
-        URL(string: "https://chain-tests.arcnetworking")!
+        URL.fixture("https://chain-tests.arcnetworking")
     }
 
     var path: String {

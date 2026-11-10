@@ -5,6 +5,18 @@ All notable changes to ARCNetworking will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-11-06
+
+### Changed
+
+- **`HTTPError` and `LoggingInterceptor` drop `@unchecked Sendable`.** Both are still `Sendable`
+  (`Error` and `RequestInterceptor` already require it), but the compiler now checks the
+  conformance instead of trusting it. No API or behaviour change, and existing call sites compile
+  unchanged. ([#23](https://github.com/arclabs-studio/ARCNetworking/pull/23))
+- **Examples.** The demo app moved from `Example/` to `Examples/`, the studio convention, and is now linted in CI.
+  It no longer hardcodes an Apple Developer Team ID and no longer force-unwraps its base URLs.
+  ([#21](https://github.com/arclabs-studio/ARCNetworking/pull/21), [#22](https://github.com/arclabs-studio/ARCNetworking/pull/22), [#23](https://github.com/arclabs-studio/ARCNetworking/pull/23))
+
 ## [1.0.0] - 2026-08-20
 
 First public release of **ARCNetworking**.
